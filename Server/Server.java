@@ -6,13 +6,13 @@ import java.util.*;
 
 public class Server 
 {
-    ServerSocket server;
+    private ServerSocket server;
     
-    Map StreamsTable;
+    private Hashtable StreamsTable;
     
     public Server ( int port ) throws IOException
     {
-        this.StreamsTable = Collections.synchronizedMap (new HashMap());
+        this.StreamsTable = new Hashtable();
         listen ( port );
     }
     
@@ -34,5 +34,39 @@ public class Server
         }
     }
 
-}
+    Enumeration getStreams() {
+        return StreamsTable.elements();
+    }
 
+    void sendToAll ( String message )
+    {
+        synchronized ( StreamsTable )
+        {
+            for ( Enumeration e = getStreams(); e.hasMoreElements(); )
+            {
+                DataOutputStream dataout = (DataOutputStream)e.nextElement();
+                try {
+                    dataout.writeUTF ( message );
+                } catch ( IOException ie ) {
+                    System.out.println ( ie );
+                }
+            }
+        }
+    }
+
+    void removeConnection ( Socket s )
+    {
+        synchronized ( StreamsTable )
+        {
+            System.out.println ( "Zamykanie połączenia " +s );
+            StreamsTable.remove ( s );
+            
+            try {
+                s.close ();
+            } catch ( IOException ie ) {
+                System.out.println ( "Błąd podczas zamykania " +s );
+                ie.printStackTrace ();
+            }
+        }
+    }
+}
