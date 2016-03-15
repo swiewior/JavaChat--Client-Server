@@ -1,0 +1,31 @@
+Harmonogram projektu
+Wielow¹tkowy serwer chatu
+1. Okienka
+* Okno chatu
+* Okno rejestracji
+* Okno logowania
+* Okno historii
+2. Zapis i odczyt plików
+* Zapis historii rozmowy Odczyt historii rozmowy
+* Zapis i odczyt konfiguracji klienta i serwera
+* Zapis logów serwera
+3. Wspó³bie¿noœæ
+* Wielow¹tkowoœæ prosta (1 klient – 1 w¹tek), w¹tek nas³uchuj¹cy
+* Ograniczenie masowej wielow¹tkowoœci przy wielu u¿ytkownikach (nIO)
+* Mechanizm wrzucania wiadomoœci do skrzynek u¿ytkowników
+* Mechanizm przechowywania rozmowy
+4. Bazy danych
+* Baza danych u¿ytkowników (JDBC, CRUD)
+* Logowanie i rejestracja (logika le¿¹ca po stronie serwera) sprawdzanie listy zalogowanych u¿ytkowników
+* Przetwarzanie nowych konwersacji
+5. Komunikacja sieciowa
+* Klasa serwer: nas³uchiwanie i akceptowanie po³¹czenia
+* Klasa klient: obs³uga zdarzeñ
+* Obs³uga plików (z paskiem postêpu)
+* Odczytanie wiadomoœci, wys³anie odpowiedzi (po stronie serwera i klienta), zorganizowanie protoko³u komunikacji
+6. Zaproponowane przez studenta
+* Pokoje rozmów
+* GUI + logika na serwerze
+* Wysy³anie prywatnych wiadomoœci
+* Mo¿liwoœæ przesy³ania plików przez sieæ
+* Historia rozmów
