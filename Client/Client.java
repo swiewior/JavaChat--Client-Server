@@ -1,14 +1,15 @@
 package Client;
 
-import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import javax.swing.*;
 
-public class Client implements Runnable
+public class Client extends JFrame implements Runnable
 {
-    private TextField tf = new TextField();
-    private TextArea ta = new TextArea();
+    JPanel panel;
+    private JTextField tf = new JTextField();
+    private JTextArea ta = new JTextArea();
 
     private Socket socket;
      
@@ -17,7 +18,17 @@ public class Client implements Runnable
     
     public Client ( String host, int port)
     {
-        //set window
+        //ustawianie okna
+        panel = new JPanel();
+        this.setSize(500, 500);
+        this.setVisible(true);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        panel.setLayout(null);
+        this.add(panel);
+        tf.setBounds(20, 400, 340, 30);
+	panel.add(tf);
+        ta.setBounds(20, 20, 450, 360);
+	panel.add(ta);
         
         tf.addActionListener ( new ActionListener()
         {
@@ -28,7 +39,6 @@ public class Client implements Runnable
         });
         
         try {
-
             socket = new Socket( host, port );
 
             System.out.println( "Połączono z "+socket );
