@@ -31,6 +31,7 @@ public class Server
             dataout = new DataOutputStream ( newconnection.getOutputStream () );
             
             StreamsTable.put ( newconnection, dataout );
+            ServerThread thread = new ServerThread( this, newconnection );
         }
     }
 
