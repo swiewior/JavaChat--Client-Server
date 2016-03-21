@@ -8,7 +8,7 @@ public class Server
 {
     private ServerSocket server;
     
-    private Hashtable StreamsTable;
+    private final Hashtable StreamsTable;
     
     public Server ( int port ) throws IOException
     {
@@ -29,8 +29,9 @@ public class Server
             
             DataOutputStream dataout;
             dataout = new DataOutputStream ( newconnection.getOutputStream () );
-            
-            StreamsTable.put ( newconnection, dataout );
+            synchronized(StreamsTable){
+                StreamsTable.put ( newconnection, dataout );
+            }
             ServerThread thread = new ServerThread( this, newconnection );
         }
     }

@@ -10,6 +10,9 @@ public class ServerThread extends Thread
 
     public ServerThread( Server server, Socket socket ) {
         this.server = server;
+        this.socket = socket;
+        
+        start();
     }
     
     @Override
@@ -17,16 +20,17 @@ public class ServerThread extends Thread
     {
         try {
             DataInputStream din = new DataInputStream( socket.getInputStream() );
-
             while (true) 
             {
                 String message = din.readUTF();
-                System.out.println( "Sending "+message );
+                System.out.println( "Wysyłam "+message );
 
                 server.sendToAll( message );
             }
         } catch( EOFException ie ) {
+            System.out.println( "Błąd! EOFException" );
         } catch( IOException ie ) {
+            System.out.println( "Błąd! IOException" );
             ie.printStackTrace();
         } finally {
             server.removeConnection( socket );
