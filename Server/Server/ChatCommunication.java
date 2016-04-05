@@ -1,0 +1,87 @@
+package Server;
+
+import java.net.Socket;
+import java.io.IOException;
+import java.io.DataInputStream;
+import java.io.BufferedInputStream;
+
+public class ChatCommunication implements Runnable,CommonSettings
+{
+    /********Initialize the Socket to the Client***********/
+    ChatCommunication(Server chatserver, Socket clientsocket)
+    {				
+            Parent = chatserver;
+            socket = clientsocket;	
+            try {	
+            inputstream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));		
+            }catch(IOException _IOExc) { }
+            thread = new Thread(this);
+            thread.start();	
+    }
+
+    /********Implement the Thread Interface*********/
+    public void run()
+    {
+        while(thread != null)
+        {
+            try {				
+                RFC = inputstream.readLine();											
+                /*******RFC Checking**************/
+                if(RFC.startsWith("HELO")) {					
+                    Parent.AddUser(socket,RFC.substring(5));														
+                }
+
+                if(RFC.startsWith("QUIT")) {
+                    Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),REMOVE_USER);
+                    QuitConnection();	
+                }
+
+                if(RFC.startsWith("KICK")) {
+                    Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),KICK_USER);
+                    QuitConnection();
+                }
+
+                if(RFC.startsWith("CHRO")) {
+                        Parent.ChangeRoom(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+                }
+
+                if(RFC.startsWith("MESS")) {
+                        Parent.SendGeneralMessage(socket,RFC.substring(RFC.indexOf(":")+1),RFC.substring(RFC.indexOf("~")+1,RFC.indexOf(":")),RFC.substring(5,RFC.indexOf("~")));	
+                }
+
+                if(RFC.startsWith("PRIV")) {
+                        Parent.SendPrivateMessage(RFC.substring(RFC.indexOf("~")+1),RFC.substring(5,RFC.indexOf("~")));	
+                }
+
+                if(RFC.startsWith("ROCO")) {
+                        Parent.GetUserCount(socket,RFC.substring(5));	
+                }								
+
+
+                if(RFC.startsWith("REIP")) {
+                        Parent.GetRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+                }
+
+                if(RFC.startsWith("AEIP")) {
+                        Parent.SendRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+                }	
+            } catch(Exception _Exc) { Parent.RemoveUserWhenException(socket);QuitConnection();}	
+        }
+    }
+
+    private void QuitConnection()
+    {
+        thread.stop();
+        thread = null;		
+        try {
+        socket.close();
+        }catch(IOException _IOExc) { }
+        socket = null;	
+    }
+    /**********Global Variable Declarations***************/
+    Thread thread;
+    Socket socket;
+    DataInputStream inputstream;
+    String RFC;
+    Server Parent;	
+}

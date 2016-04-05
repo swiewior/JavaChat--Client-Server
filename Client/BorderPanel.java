@@ -3,6 +3,19 @@ import java.util.Vector;
 
 public class BorderPanel extends Panel
 {
+    // Zmienne globalne
+    public Vector tabNames;
+    public Vector tabPos;
+    public Vector cardNames;
+    public Panel cardPanel;
+    public CardLayout cardLayout;
+    public int xofs;
+    public Font textFont;
+    public int curTab;
+    Dimension dim;
+    Border Tabs;
+    TapPanel Cframe;
+    Client chatclient;
 
     public BorderPanel(TapPanel tappanel, Client app , CardLayout cardlayout, Panel panel, int i, int j)
     {
@@ -66,17 +79,4 @@ public class BorderPanel extends Panel
         cardNames.addElement(s1);
         return tabNames.size() - 1;
     }
-
-    public Vector tabNames;
-    public Vector tabPos;
-    public Vector cardNames;
-    public Panel cardPanel;
-    public CardLayout cardLayout;
-    public int xofs;
-    public Font textFont;
-    public int curTab;
-    Dimension dim;
-    Border Tabs;
-    TapPanel Cframe;
-	Client chatclient;
 }

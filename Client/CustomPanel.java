@@ -11,13 +11,11 @@ class CustomPanel extends Panel
         validate();
     }
 
-    public Dimension minimumSize()
-    {
+    public Dimension minimumSize() {
         return dimension;
     }
 
-    public Dimension preferredSize()
-    {
+    public Dimension preferredSize() {
         return size();
     }
 

@@ -1,11 +1,21 @@
-
 import java.awt.*;
-import java.awt.Graphics;
-import java.awt.Dimension;
 
 public class Border extends Canvas implements CommonSettings
 {
-
+    // Zmienne globalne
+    int mode;
+    int width;
+    int height;
+    int size;
+    int bsize;
+    Dimension dim;
+    BorderPanel parent;
+    TapPanel Cframe;
+    Color c1;
+    int tabHeight;
+    Client chatclient;
+    FontMetrics fontmetrics;
+    
     public void DrawBottom(Graphics g)
     {
         int i = size().width;
@@ -141,13 +151,11 @@ public class Border extends Canvas implements CommonSettings
         g.drawLine(i - 1, 1, i - 1, j + 1);
     }
 
-    public Dimension minimumSize()
-    {
+    public Dimension minimumSize() {
         return dim;
     }
 
-    public void update(Graphics g)
-    {
+    public void update(Graphics g) {
         paint(g);
     }
 
@@ -167,14 +175,14 @@ public class Border extends Canvas implements CommonSettings
 	
 	public boolean 	mouseEnter(Event event, int i, int j)
 	{
-		setCursor(new Cursor(Cursor.HAND_CURSOR));
-		return true;
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+            return true;
 	}
 
 	public boolean 	mouseExit(Event event, int i, int j)
 	{
-		setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); 
-		return true;
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); 
+            return true;
 	}
 	
     public boolean mouseDown(Event event, int i, int j)
@@ -191,8 +199,7 @@ public class Border extends Canvas implements CommonSettings
         return true;
     }
 
-    public Dimension preferredSize()
-    {
+    public Dimension preferredSize() {
         return minimumSize();
     }
 
@@ -259,16 +266,5 @@ public class Border extends Canvas implements CommonSettings
         g.drawLine(width - 1, 0, width - 1, height - 1);
     }
 
-    int mode;
-    int width;
-    int height;
-    int size;
-    int bsize;
-    Dimension dim;
-    BorderPanel parent;
-    TapPanel Cframe;
-    Color c1;
-    int tabHeight;
-	Client chatclient;
-	FontMetrics fontmetrics;
+
 }
