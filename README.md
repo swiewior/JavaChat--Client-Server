@@ -24,8 +24,8 @@
 * Obsługa plików (z paskiem postępu)
 * *Odczytanie wiadomości, wysłanie odpowiedzi (po stronie serwera i klienta), zorganizowanie protokołu komunikacji (1.03.2016)*
 ### 6. Zaproponowane przez studenta ###
-* Pokoje rozmów
+* *Pokoje rozmów (5.04.2016)*
 * GUI + logika na serwerze
-* Wysyłanie prywatnych wiadomości
+* *Wysyłanie prywatnych wiadomości (5.04.2016)*
 * Możliwość przesyłania plików przez sieć
 * Historia rozmów
