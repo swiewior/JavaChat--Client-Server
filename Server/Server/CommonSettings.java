@@ -6,5 +6,5 @@ public interface CommonSettings
     public int KICK_USER            = 	0;
     public int REMOVE_USER          = 	1;
     public int MAX_MESSAGE          =	30;
-    public String ROOM_NAME         =	"General";	
+    public String ROOM_NAME         =	"Glowny";	
 }

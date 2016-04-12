@@ -1,35 +1,39 @@
 package Server;
 
+import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.JButton;
 
 public class Server extends Frame implements Serializable, ActionListener, Runnable, CommonSettings
 {
     //Zmienne globalne
     Properties DBProperties;
-    Button cmdStart,cmdStop;
+    JButton cmdStart,cmdStop;
     ServerSocket server;
     Socket socket;
     Thread thread;    
     ArrayList userarraylist, messagearraylist;
     ChatCommunication chatcommunication;	
     DataOutputStream dataoutputstream;
-    int G_ILoop;
+    int G_ILoop, Port;
     ClientObject clientobject;
     String RoomList;
+    protected TextField TxtPort, TxtRooms;
+    Properties properties;
+    InformationDialog dialog;
     
     public Server () 
     {
         //Inicjalizacja
         this.setTitle("Java Chat Server");
         this.setResizable(false);
-        this.setBackground(Color.yellow);		
+        this.setBackground(Color.white);		
         this.setLayout(new BorderLayout());
 
-        // Panel górny
+        // Panel tytułu
         Panel topPanel = new Panel(new BorderLayout());
         topPanel.setBackground(Color.black);
         Label lblTitle = new Label("Wielowątkowy Serwer Chatu",1);
@@ -40,22 +44,23 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
         
         //Panel główny
         Panel centerPanel = new Panel(null);
-        cmdStart = new Button("START SERVER");
+        cmdStart = new JButton("START SERVER");
         cmdStart.setBounds(125,10,150,30);
         cmdStart.addActionListener(this);
         centerPanel.add(cmdStart);
 
-        cmdStop = new Button("STOP SERVER");
+        cmdStop = new JButton("STOP SERVER");
         cmdStop.setBounds(125,50,150,30);
         cmdStop.setEnabled(false);
         cmdStop.addActionListener(this);
         centerPanel.add(cmdStop);
-        add("Center",centerPanel);		
+        
+        add("Center", centerPanel);
 
-        setSize(400,150);
-        show();
-
-        // Event zamykania
+        setSize(400,160);
+        setLocation(100, 100);
+        
+        // Zamknięcie okienka
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {				
                 ExitServer();
@@ -63,6 +68,10 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
                 System.exit(0);
             }
         });
+    
+    dialog = new InformationDialog(this);	
+    Port = Integer.parseInt(dialog.TxtPort.getText());
+    RoomList = dialog.TxtRooms.getText();
     }
   
     // Obsługa eventów
@@ -75,15 +84,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
             DBProperties = GetDBProperties();
             // Inicjalizacja ServerSocket
             try {												
-                RoomList = "";
-                if(DBProperties.getProperty("roomlist") != null)
-                {
-                    RoomList = DBProperties.getProperty("roomlist");
-                }
-
-                int m_portNo = 80;
-                
-                server = new ServerSocket(m_portNo);
+                server = new ServerSocket(Port);
                 System.out.println ( "Nasłuchiwanie portu " +server );
             }catch(IOException _IOExc) { }
 
@@ -132,7 +133,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
         }	
     }
 
-    // Wysyłąnie wiadomości do klienta
+    // Wysyłanie wiadomości do klienta
     private void SendMessageToClient(Socket clientsocket,String message)
     {
         try {
@@ -173,7 +174,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
     private int GetIndexOf(String UserName)
     {
         int m_userListSize = userarraylist.size();
-        for(G_ILoop = 0; G_ILoop < 	m_userListSize; G_ILoop++)
+        for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
         {
             clientobject = (ClientObject) userarraylist.get(G_ILoop);
             if(clientobject.getUserName().equalsIgnoreCase(UserName))
@@ -267,7 +268,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
                 // Wyślij informacje o usunięciu do wszystkich
                 for(int m_ILoop = 0; m_ILoop < m_userListSize; m_ILoop++)
                 {
-                    clientobject = 	(ClientObject) userarraylist.get(m_ILoop);
+                    clientobject = (ClientObject) userarraylist.get(m_ILoop);
                     if(clientobject.getRoomName().equals(m_RemoveRoomName))
                         SendMessageToClient(clientobject.getSocket(),m_RemoveRFC);
                 }
@@ -291,7 +292,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
 
             // Wyślij listę użytkowników w pokoju
             int m_userListSize = userarraylist.size();
-            StringBuffer stringbuffer = new StringBuffer("LIST ");			
+            StringBuilder stringbuffer = new StringBuilder("LIST ");			
             for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
             {
                 clientobject = (ClientObject) userarraylist.get(G_ILoop);				
@@ -354,7 +355,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
                 clientobject = (ClientObject) userarraylist.get(G_ILoop);
                 if((clientobject.getRoomName().equals(RoomName)) && (!(clientobject.getUserName().equals(UserName))))
                 {				
-                        SendMessageToClient(clientobject.getSocket(),m_messageRFC);	
+                    SendMessageToClient(clientobject.getSocket(),m_messageRFC);	
                 }	
         }
 
@@ -364,7 +365,6 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
             SendMessageToClient(ClientSocket,"KICK ");
             messagearraylist.clear();		
         }
-
     }
 
     // Wysyłanie prywatnej wiadomości
@@ -377,8 +377,6 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
         }
 
     }
-
-
 
     // Adres użytkownika
     protected void GetRemoteUserAddress(Socket ClientSocket, String ToUserName, String FromUserName)
@@ -405,43 +403,47 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
     // Licznik użytkowników
     protected void GetUserCount(Socket ClientSocket, String RoomName)
     {
-            int m_userListSize = userarraylist.size();
-            int m_userCount = 0;
-            for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
-            {
-                    clientobject = (ClientObject) userarraylist.get(G_ILoop);
-                    if(clientobject.getRoomName().equals(RoomName))
-                            m_userCount++;	
-            }
+        System.out.println ( "RoomName"+RoomName );
+        int m_userListSize = userarraylist.size();
+        System.out.println ( "m_userListSize = "+m_userListSize );
+        int m_userCount = 0;
 
-            SendMessageToClient(ClientSocket,"ROCO "+RoomName+"~"+m_userCount);
+        for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
+        {
+            clientobject = (ClientObject) userarraylist.get(G_ILoop);
+             System.out.println ( "RoomName "+RoomName );
+             System.out.println ( "clientobject.getRoomName() "+clientobject.getRoomName() );
+            if(clientobject.getRoomName().equals(RoomName))
+                m_userCount++;
+        }
+
+        SendMessageToClient(ClientSocket,"ROCO "+RoomName+"~"+m_userCount);
     }
 
     // Zamykanie serwera, niszczenie wszystkiego
     void ExitServer()
     {
-        
-            if(thread != null)
-            {
-                System.out.println ( "Zamykanie wątku" );
-                thread.stop();
-                thread = null;
+        if(thread != null)
+        {
+            System.out.println ( "Zamykanie wątku" );
+            thread.stop();
+            thread = null;
+        }
+        try {
+            if(server != null)
+            {			
+                System.out.println ( "Zamykanie serwera" );
+                server.close();
+                server = null;
             }
-            try {
-                if(server != null)
-                {			
-                    System.out.println ( "Zamykanie serwera" );
-                    server.close();
-                    server = null;
-                }
-            }catch(IOException _IOExc) { 
-                System.out.println ( "Błąd IO podczas zamykania" );
-            }		
-            
-            userarraylist = null;
-            messagearraylist = null;
-            cmdStop.setEnabled(false);
-            cmdStart.setEnabled(true);
+        }catch(IOException _IOExc) { 
+            System.out.println ( "Błąd IO podczas zamykania" );
+        }		
+
+        userarraylist = null;
+        messagearraylist = null;
+        cmdStop.setEnabled(false);
+        cmdStart.setEnabled(true);
     }
 
     // Plik z ustawieniami
@@ -461,44 +463,4 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
             return (DBProperties);
         }
     }
-    
-    /****************************/
-/*
-    Enumeration getStreams() {
-        return StreamsTable.elements();
-    }
-
-    // Wysyłanie wiadomości
-    void sendToAll ( String message )
-    {
-        synchronized ( StreamsTable )
-        {
-            for ( Enumeration e = getStreams(); e.hasMoreElements(); )
-            {
-                DataOutputStream dataout = (DataOutputStream)e.nextElement();
-                try {
-                    dataout.writeUTF ( message );
-                } catch ( IOException ie ) {
-                    System.out.println ( ie );
-                }
-            }
-        }
-    }
-
-    // Zamykanie połączenia
-    void removeConnection ( Socket s )
-    {
-        synchronized ( StreamsTable )
-        {
-            System.out.println ( "Zamykanie połączenia " +s );
-            StreamsTable.remove ( s );
-            
-            try {
-                s.close ();
-            } catch ( IOException ie ) {
-                System.out.println ( "Błąd podczas zamykania " +s );
-                ie.printStackTrace ();
-            }
-        }
-    }*/
 }
