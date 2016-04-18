@@ -16,6 +16,9 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
     Socket socket;
     Thread thread;    
     ArrayList userarraylist, messagearraylist;
+      /** File Sharing List **/
+    public Vector clientFileSharingUsername;
+    public Vector clientFileSharingSocket;
     ChatCommunication chatcommunication;	
     DataOutputStream dataoutputstream;
     int G_ILoop, Port;
@@ -90,7 +93,9 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
 
             // Inicjalizacja listy
             userarraylist = new ArrayList();
-            messagearraylist = new ArrayList();	
+            messagearraylist = new ArrayList();
+            clientFileSharingUsername = new Vector();
+            clientFileSharingSocket = new Vector();
 
             // Inicjalizacja wątku
             thread = new Thread(this);
@@ -222,7 +227,6 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
         SendMessageToClient(ClientSocket,stringbuffer.toString());	
 
     }
-
 
     // Usuń użytkownika z serwera
     public void RemoveUser(String UserName, String RoomName, int RemoveType)
@@ -389,7 +393,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
 
     }
 
-    // Wysyłąnie adresu użytkownika
+    // Wysyłanie adresu użytkownika
     protected void SendRemoteUserAddress(Socket ClientSocket, String ToUserName, String FromUserName)
     {
             clientobject = GetClientObject(FromUserName);		
@@ -398,6 +402,8 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
                     SendMessageToClient(clientobject.getSocket(),"AEIP "+ ToUserName +"~"+ClientSocket.getInetAddress().getHostAddress());						
             }			
     }
+    
+    
 
 
     // Licznik użytkowników
@@ -463,4 +469,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
             return (DBProperties);
         }
     }
+
+
 }
+                   

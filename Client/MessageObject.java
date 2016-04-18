@@ -7,8 +7,7 @@ public class MessageObject
         Height  = 0;
         StartX  = 0;
         StartY  = 0;
-        Message = null;  
-        IsImage = false;   
+        Message = null;
         Selected = false;   
         IsIgnored = false;        
     }
@@ -18,8 +17,7 @@ public class MessageObject
     int StartX;
     int StartY;
     int Width;
-    int Height;       
-    boolean IsImage; 
+    int Height;
     boolean Selected;
     boolean IsIgnored;
     int MessageType;    

@@ -12,7 +12,7 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
    
     MessageBox(Client Parent,boolean okcan)
     {
-       super(Parent, "Information", false);
+       super(Parent, "Informacje", false);
        chatclient = Parent;
        setBackground(chatclient.ColorMap[0]);
        setLayout(new BorderLayout());	 
@@ -54,7 +54,7 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
 
     private void createCancelButton(Panel panel) 
     {
-          CmdCancel = new JButton("Cancel");
+          CmdCancel = new JButton("Anuluj");
           panel.add(CmdCancel);
           CmdCancel.addActionListener(this);
     }

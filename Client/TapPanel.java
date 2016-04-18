@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 
 public class TapPanel extends Panel implements CommonSettings,ActionListener
 {
@@ -12,7 +13,8 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
     protected TextField TxtUserCount;
     ScrollView UserScrollView,RoomScrollView;
     protected ListViewCanvas UserCanvas,RoomCanvas;
-    JButton CmdChangeRoom, CmdIgnoreUser, CmdSendDirect ;
+    JButton CmdChangeRoom, CmdIgnoreUser, CmdSendDirect, CmdHistory, CmdSendFile;
+		HistoryFrame historyFrame;
     
     // Konstruktor
     TapPanel(Client parent)
@@ -38,6 +40,16 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
         CmdIgnoreUser = new JButton("Ignoruj");
         CmdIgnoreUser.addActionListener(this);
         UserButtonPanel.add("Center",CmdIgnoreUser);
+				Panel ButtonsPanel = new Panel(new BorderLayout());
+				
+				CmdHistory = new JButton("Historia");
+				CmdHistory.addActionListener(this);
+				ButtonsPanel.add("North",CmdHistory);
+				CmdSendFile = new JButton("Wyślij plik");
+				CmdSendFile.addActionListener(this);
+				ButtonsPanel.add("Center",CmdSendFile);		
+				
+				UserButtonPanel.add("South", ButtonsPanel);
         UserPanel.add("South",UserButtonPanel);
 
         Panel RoomPanel = new Panel(new BorderLayout());
@@ -74,6 +86,7 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
         add("Center",Tappanel);	  		  
 
 
+
     }
 
 
@@ -99,6 +112,12 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
         {
                 UserCanvas.SendDirectMessage();	
         }
+				//Historia
+				if(evt.getSource().equals(CmdHistory))
+				{
+					//historyFrame.setLocation(this.getLocation());
+					chatclient.historyFrame.setVisible(true);
+				}
     }
 
 
