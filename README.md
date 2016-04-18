@@ -4,9 +4,9 @@
 * *Okno chatu (15.03.2016)*
 * Okno rejestracji
 * *Okno logowania (15.03.2016)*
-* Okno historii (19.04.2016)
+* *Okno historii (19.04.2016)*
 ### 2. Zapis i odczyt plików ###
-* Zapis historii rozmowy Odczyt historii rozmowy (19.04.2016)
+* *Zapis historii rozmowy Odczyt historii rozmowy (19.04.2016)*
 * *Zapis i odczyt konfiguracji klienta i serwera (12.04.2016)*
 * Zapis logów serwera
 ### 3. Współbieżność ###
@@ -28,4 +28,4 @@
 * *GUI + logika na serwerze (12.04.2016)*
 * *Wysyłanie prywatnych wiadomości (5.04.2016)*
 * Możliwość przesyłania plików przez sieć
-* Historia rozmów (19.04.2016)
+* *Historia rozmów (19.04.2016)*
