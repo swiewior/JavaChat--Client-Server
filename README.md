@@ -7,7 +7,7 @@
 * Okno historii
 ### 2. Zapis i odczyt plików ###
 * Zapis historii rozmowy Odczyt historii rozmowy
-* Zapis i odczyt konfiguracji klienta i serwera
+* *Zapis i odczyt konfiguracji klienta i serwera (12.04.2016)*
 * Zapis logów serwera
 ### 3. Współbieżność ###
 * *Wielowątkowość prosta (1 klient – 1 wątek), wątek nasłuchujący (8.03.2016)*
@@ -25,7 +25,7 @@
 * *Odczytanie wiadomości, wysłanie odpowiedzi (po stronie serwera i klienta), zorganizowanie protokołu komunikacji (1.03.2016)*
 ### 6. Zaproponowane przez studenta ###
 * *Pokoje rozmów (5.04.2016)*
-* GUI + logika na serwerze
+* *GUI + logika na serwerze (12.04.2016)*
 * *Wysyłanie prywatnych wiadomości (5.04.2016)*
 * Możliwość przesyłania plików przez sieć
 * Historia rozmów
