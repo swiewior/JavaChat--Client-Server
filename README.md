@@ -21,11 +21,11 @@
 ### 5. Komunikacja sieciowa ###
 * *Klasa serwer: nasłuchiwanie i akceptowanie połączenia (1.03.2016)*
 * *Klasa klient: obsługa zdarzeń (8.03.2016)*
-* Obsługa plików (z paskiem postępu)
+* *Obsługa plików (10.05.2016)*
 * *Odczytanie wiadomości, wysłanie odpowiedzi (po stronie serwera i klienta), zorganizowanie protokołu komunikacji (1.03.2016)*
 ### 6. Zaproponowane przez studenta ###
 * *Pokoje rozmów (5.04.2016)*
 * *GUI + logika na serwerze (12.04.2016)*
 * *Wysyłanie prywatnych wiadomości (5.04.2016)*
-* Możliwość przesyłania plików przez sieć
+* *Możliwość przesyłania plików przez sieć (10.05.2016)*
 * *Historia rozmów (19.04.2016)*
