@@ -1,3 +1,5 @@
+package gui;
+
 import java.awt.Panel;
 import java.awt.Dimension;
 

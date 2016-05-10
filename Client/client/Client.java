@@ -1,3 +1,12 @@
+package client;
+
+import filetransfer.Download;
+import filetransfer.Upload;
+import gui.MessageBox;
+import gui.MessageCanvas;
+import gui.ScrollView;
+import gui.HistoryFrame;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.StringTokenizer;
@@ -6,7 +15,9 @@ import java.net.Socket;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 import java.util.Date;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Client extends Frame implements Serializable, Runnable, 
 				KeyListener, ActionListener, CommonSettings 
@@ -30,7 +41,7 @@ public class Client extends Frame implements Serializable, Runnable,
   TapPanel tappanel;
   TextField TxtMessage;
   JButton CmdSend,CmdExit;
-  Font TextFont;
+  public Font TextFont;
   protected PrivateChat[] privatewindow;
   protected int PrivateWindowCount;
   InformationDialog dialog;
@@ -43,8 +54,9 @@ public class Client extends Frame implements Serializable, Runnable,
 	public History hist;
 	public HistoryFrame historyFrame;
 	public String HistoryFile;
+	public String TransferFile;
 	
-  Client() 
+  public Client() 
   {		
     toolkit = Toolkit.getDefaultToolkit();		
     if(toolkit.getScreenSize().getWidth() > 778)
@@ -89,15 +101,7 @@ public class Client extends Frame implements Serializable, Runnable,
     UserRoom = "";
     RoomList = "";
 		HistoryFile = "";
-
-    // Mapa kolorów
-    ColorMap = new Color[6];
-    ColorMap[0] = Color.white; // Tło 
-    ColorMap[1] = Color.white; // Tło panelu górnego
-    ColorMap[2] = Color.white; // Kolor panelu bocznego
-    ColorMap[3] = Color.black; // kolor wiadomości
-    ColorMap[4] = Color.white; // tło górnego panelu
-    ColorMap[5] = Color.black; // Tło tekstu menu
+		TransferFile = "";
     
     // Okno prywatnych wiadomości
     privatewindow = new PrivateChat[MAX_PRIVATE_WINDOW];
@@ -134,30 +138,31 @@ public class Client extends Frame implements Serializable, Runnable,
   {
     try {
       dataoutputstream.writeBytes(Message+"\r\n");	
-    }catch(IOException _IoExc) { QuitConnection(QUIT_TYPE_DEFAULT);}			
+    }catch(IOException _IoExc) { QuitConnection(QUIT_TYPE_DEFAULT);}		
+		System.out.print("SendMessageToServer: '"+Message+"'" + "\n");
   }
     
   private void InitializeAppletComponents()
   {
     // Ustawienia okienka
-    setBackground(ColorMap[0]);	
+    setBackground(Color.white);	
     Font font = new Font("Dialog",Font.BOLD,11);
     TextFont = new Font("Dialog",0,11);	
     setFont(font);	
 
     // Górny panel
     Panel TopPanel = new Panel(new BorderLayout());
-    TopPanel.setBackground(ColorMap[4]);	
+    TopPanel.setBackground(Color.white);	
     add("North",TopPanel);	
 
     // Panel informacji
     Panel CenterPanel = new Panel(new BorderLayout());
     Panel InformationPanel = new Panel(new BorderLayout());	
-    InformationPanel.setBackground(ColorMap[1]);			
+    InformationPanel.setBackground(Color.white);			
     InformationLabel = new Label();		
     InformationLabel.setAlignment(1);
 
-    InformationLabel.setForeground(ColorMap[5]); 
+    InformationLabel.setForeground(Color.black); 
     InformationPanel.add("Center",InformationLabel);
     CenterPanel.add("North",InformationPanel);
 
@@ -313,7 +318,8 @@ public class Client extends Frame implements Serializable, Runnable,
     {
 			// Obsługa Wskaźników
       try {
-        ServerData = datainputstream.readLine();									
+        ServerData = datainputstream.readLine();	
+				System.out.print("datainputstream: " + ServerData + "\n");
         // Lista użytkowników
         if(ServerData.startsWith("LIST"))
         {
@@ -401,8 +407,7 @@ public class Client extends Frame implements Serializable, Runnable,
 							table.addRow(new Object[]{ServerData.substring(5,ServerData.indexOf(":")), 
 								ServerData.substring(ServerData.indexOf(":")+2), UserRoom, msgTime});
 						} catch(Exception ex){}
-					}
-            						
+					}				
         }
 
         // Wyrzucanie
@@ -449,7 +454,8 @@ public class Client extends Frame implements Serializable, Runnable,
         {
           SplitString = ServerData.substring(5,ServerData.indexOf("~"));
           tappanel.UserCanvas.RemoveListItem(SplitString);
-          messagecanvas.AddMessageToMessageObject(SplitString+" Opuścił pokój: "+UserRoom+" i dołączył do: "+ServerData.substring(ServerData.indexOf("~")+1),MESSAGE_TYPE_ADMIN);													
+          messagecanvas.AddMessageToMessageObject(SplitString+" opuścił pokój: "
+									+UserRoom+" i dołączył do: "+ServerData.substring(ServerData.indexOf("~")+1),MESSAGE_TYPE_ADMIN);													
 
           // Aktualizacja panelu informacyjnego
           TotalUserCount--;
@@ -460,9 +466,61 @@ public class Client extends Frame implements Serializable, Runnable,
         if( ServerData.startsWith("ROCO"))
         {
             SplitString = ServerData.substring(5,ServerData.indexOf("~"));
-            tappanel.TxtUserCount.setText("Liczba użytkowników w "+SplitString+" : "+ServerData.substring(ServerData.indexOf("~")+1));
+            tappanel.TxtUserCount.setText("Liczba użytkowników w "+SplitString+" : "
+										+ServerData.substring(ServerData.indexOf("~")+1));
         }
+				
+				// Odbieranie pliku
+				if( ServerData.startsWith("UPRQ"))
+        {
+					String Sender = ServerData.substring(5,ServerData.indexOf("~"));
+					String Filename = ServerData.substring(ServerData.indexOf(":")+1);
+					if(0 == JOptionPane.showConfirmDialog(null, ("Odebrać '" + Filename + "' od "+SplitString+"?"), 
+									"Odbieranie pliku", JOptionPane.YES_NO_OPTION))
+					{
+						JFileChooser jf = new JFileChooser();
+						jf.setSelectedFile(new File(Filename));
+						int returnVal = jf.showSaveDialog(null);
+						
+						String saveTo = jf.getSelectedFile().getPath();
+						if(saveTo != null && returnVal == JFileChooser.APPROVE_OPTION)
+						{
+							Download dwn = new Download(saveTo, messagecanvas);
+							Thread t = new Thread(dwn);
+							t.start();
+							SendMessageToServer("UPRS "+ UserName + "~" + Sender + ":" + dwn.port);
+						}
+						else{
+							SendMessageToServer("UPRS " + UserName + "~" + Sender + ":" + "NO");
+						}
+					}
+					else
+						SendMessageToServer("UPRS " + UserName + "~" + Sender + ":" + "NO");
+        }
+				
+				// Wysyłanie pliku
+				if(ServerData.startsWith("UPRS"))
+				{
+					String sender = ServerData.substring(5,ServerData.indexOf("~"));
+					System.out.print("UPRS: sender = " + sender + "\n");
+					String answer = ServerData.substring(ServerData.indexOf(":")+1);
+					System.out.print("UPRS: answer = " + answer + "\n");
+					
+					if(!answer.equals("NO"))
+					{
+						int port  = Integer.parseInt(answer);
+						String addr = sender;
 
+						//ui.jButton5.setEnabled(false); ui.jButton6.setEnabled(false);
+
+							Upload upl = new Upload(addr, port, tappanel.UserCanvas.file, messagecanvas);
+							Thread t = new Thread(upl);
+							t.start();
+					}
+					else
+						messagecanvas.AddMessageToMessageObject("Odrzucono prośbę o odebranie pliku od" 
+										+ sender, MESSAGE_TYPE_ADMIN);
+				}				
 
         // Prywatne wiadomości
         if( ServerData.startsWith("PRIV"))
@@ -600,7 +658,13 @@ public class Client extends Frame implements Serializable, Runnable,
   protected void GetRoomUserCount(String RoomName)
   {
     SendMessageToServer("ROCO "+RoomName);	
-  }  
+  }
+	
+	// Wysyłanie pliku - wiadomośc na serwer
+	public void SendFileMessage(String ToUserName, File filepath)
+	{
+		SendMessageToServer("UPRQ " + UserName + "~" + ToUserName + ":" + filepath.getName());
+	}
 
   // Zamykanie połączenia
   private void QuitConnection(int QuitType)

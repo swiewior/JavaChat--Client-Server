@@ -33,7 +33,8 @@ public class ChatCommunication implements Runnable,CommonSettings
     while(thread != null)
     {
       try {				
-        RFC = inputstream.readLine();											
+        RFC = inputstream.readLine();
+				System.out.println ( "RFC: "+RFC);
         // Obsługa tokenów
         if(RFC.startsWith("HELO")) {		
           System.out.println ( "HELO");
@@ -54,31 +55,40 @@ public class ChatCommunication implements Runnable,CommonSettings
 
         if(RFC.startsWith("CHRO")) {
           Parent.ChangeRoom(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+					System.out.println ( "CHRO");
         }
 
         if(RFC.startsWith("MESS")) {
-          Parent.SendGeneralMessage(socket,RFC.substring(RFC.indexOf(":")+1),RFC.substring(RFC.indexOf("~")+1,RFC.indexOf(":")),RFC.substring(5,RFC.indexOf("~")));	
+          Parent.SendGeneralMessage(socket,RFC.substring(RFC.indexOf(":")+1),
+									RFC.substring(RFC.indexOf("~")+1,RFC.indexOf(":")),RFC.substring(5,RFC.indexOf("~")));	
+					System.out.println ( "MESS");
         }
 
         if(RFC.startsWith("PRIV")) {
             Parent.SendPrivateMessage(RFC.substring(RFC.indexOf("~")+1),RFC.substring(5,RFC.indexOf("~")));	
+						System.out.println ( "PRIV");
         }
 
         if(RFC.startsWith("ROCO")) {
           Parent.GetUserCount(socket,RFC.substring(5));	
-        }								
-
-
-        if(RFC.startsWith("REIP")) {
-          Parent.GetRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+					System.out.println ( "ROCO");
         }
 
-        if(RFC.startsWith("AEIP")) {
-          Parent.SendRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
-        }	
+				if(RFC.startsWith("UPRQ")){
+					System.out.println ( "UPRQ");
+					Parent.SendFileRequest(RFC.substring(5, RFC.indexOf("~")), 
+									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
+				}
 
+				if(RFC.startsWith("UPRS")){
+					System.out.println ( "UPRS");
+					Parent.SendFileResponse(RFC.substring(5, RFC.indexOf("~")), 
+									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
+				}
 
-      } catch(Exception _Exc) { Parent.RemoveUserWhenException(socket);QuitConnection();}	
+      } catch(Exception _Exc) { System.out.println ( "Nieobsłużony wskaźnik: "+_Exc); 
+			Parent.RemoveUserWhenException(socket);QuitConnection(); 
+					}	
     }
   }
 
@@ -93,3 +103,12 @@ public class ChatCommunication implements Runnable,CommonSettings
   }
 }
 
+/*
+        if(RFC.startsWith("REIP")) {
+          Parent.GetRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+        }
+
+        if(RFC.startsWith("AEIP")) {
+          Parent.SendRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+        }	
+*/

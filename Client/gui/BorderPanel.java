@@ -1,3 +1,7 @@
+package gui;
+
+import client.Client;
+import client.TapPanel;
 import java.awt.*;
 import java.util.Vector;
 

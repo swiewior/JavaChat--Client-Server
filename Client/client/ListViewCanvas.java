@@ -1,5 +1,16 @@
+package client;
+
+import client.Client;
+import client.CommonSettings;
+import static client.CommonSettings.MESSAGE_TYPE_ADMIN;
+import client.MessageObject;
+import client.PrivateChat;
+import gui.ScrollView;
+import gui.ScrollView;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
+import javax.swing.JFileChooser;
 
 public class ListViewCanvas extends Canvas implements CommonSettings
 {
@@ -15,6 +26,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
     FontMetrics fontmetrics; 
     int CanvasType,TotalWidth,TotalHeight;
     protected String SelectedUser;
+		public File file;
     
     // Konstruktor
     ListViewCanvas(Client Parent,int canvastype)
@@ -73,7 +85,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 
     }
 
-    // Ignorowany użytkownik
+    // Ignorowanie użytkownika
     protected void IgnoreUser(boolean IsIgnore, String IgnoreUserName)
     {
         int m_listIndex = GetIndexOf(IgnoreUserName);
@@ -96,7 +108,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
         }	
     }
 
-    // Ustaw lub usuń listę ignorowanych
+    // Wybór ignorowanego użytkownika
     protected void IgnoreUser(boolean IsIgnore)
     {
         if (SelectedUser.equals(""))
@@ -116,6 +128,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 
     protected void SendDirectMessage()
     {
+	
         if (SelectedUser.equals(""))
         {
             chatclient.messagecanvas.AddMessageToMessageObject("Nieprawidłowy wybór użytkownika",MESSAGE_TYPE_ADMIN);
@@ -128,6 +141,33 @@ public class ListViewCanvas extends Canvas implements CommonSettings
         }	
 
         CreatePrivateWindow();
+    }
+		
+		    protected void SendFile()
+    {
+			//Wybieram użytkownika
+        if (SelectedUser.equals(""))
+        {
+            chatclient.messagecanvas.AddMessageToMessageObject("Nieprawidłowy wybór użytkownika",MESSAGE_TYPE_ADMIN);
+            return;
+        }
+        if (SelectedUser.equals(chatclient.UserName))
+        {
+            chatclient.messagecanvas.AddMessageToMessageObject("Nie możesz wysłać pliku do siebie",MESSAGE_TYPE_ADMIN);	
+            return;
+        }	
+				// Wybór pliku
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.showDialog(this, "Select File");
+				file = fileChooser.getSelectedFile();
+
+				// Wysyłanie pliku
+				long size = file.length();
+				if(size < 120 * 1024 * 1024)
+					chatclient.SendFileMessage(SelectedUser, file);
+				else
+					chatclient.messagecanvas.AddMessageToMessageObject("Rozmiar pliku jest za duży",
+									MESSAGE_TYPE_ADMIN);	
     }
 
     // Sprawdzanie czy użytkownik jest ignorowany

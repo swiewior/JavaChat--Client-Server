@@ -1,3 +1,9 @@
+package gui;
+
+import client.Client;
+import client.CommonSettings;
+import gui.MessageCanvas;
+import gui.ScrollView;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JButton;
@@ -10,17 +16,17 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
     MessageCanvas messagecanvas;
     ScrollView MessageScrollView;
    
-    MessageBox(Client Parent,boolean okcan)
+    public MessageBox(Client Parent,boolean okcan)
     {
        super(Parent, "Informacje", false);
        chatclient = Parent;
-       setBackground(chatclient.ColorMap[0]);
+       setBackground(Color.white);
        setLayout(new BorderLayout());	 
        setFont(chatclient.getFont());  
        messagecanvas = new MessageCanvas(chatclient);
        MessageScrollView = new ScrollView(messagecanvas,true,true,200,100,0);
        messagecanvas.scrollview = MessageScrollView;
-       messagecanvas.setBackground(chatclient.ColorMap[0]);	   	
+       messagecanvas.setBackground(Color.white);	   	
        add("Center",MessageScrollView);	   	   
        addOKCancelPanel(okcan);
        createFrame();	  
@@ -30,7 +36,7 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
        setResizable(false);
     }
 
-    protected void AddMessage(String message)
+    public void AddMessage(String message)
     {	
         messagecanvas.AddMessageToMessageObject(message,MESSAGE_TYPE_JOIN);		
     }

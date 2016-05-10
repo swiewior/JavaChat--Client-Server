@@ -1,3 +1,8 @@
+package gui;
+
+import client.TapPanel;
+import client.Client;
+import client.CommonSettings;
 import java.awt.*;
 
 public class Border extends Canvas implements CommonSettings
@@ -20,7 +25,7 @@ public class Border extends Canvas implements CommonSettings
     {
         int i = size().width;
         int j = size().height;
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.fillRect(0, 0, i, j);
         g.setColor(Color.white);
         g.drawLine(1, 0, 1, j - 2);
@@ -31,7 +36,7 @@ public class Border extends Canvas implements CommonSettings
         g.drawLine(bsize + 2, 0, bsize + 2, 0);
         g.drawLine(1, bsize + 2, i - 2, bsize + 2);
         g.drawLine(i - 2, 0, i - 2, j - 2);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(1, bsize + 3, i - 1, bsize + 3);
         g.drawLine(i - 1, 0, i - 1, j - 1);
     }
@@ -100,16 +105,16 @@ public class Border extends Canvas implements CommonSettings
 
     public void DrawTab(Graphics g, int i, int j, int k, int l, boolean flag, String s)
     {
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.fillRect(i, j, k, l);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(i, j, (i + k) - 2, j);
         g.drawLine(i, j, i, (j + l) - 1);
         g.setColor(Color.gray);
         g.drawLine((i + k) - 2, j, (i + k) - 2, (j + l) - 1);
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.drawLine((i + k) - 1, j + 1, (i + k) - 1, (j + l) - 1);
-        g.setColor(chatclient.ColorMap[5]);
+        g.setColor(Color.black);
         if(flag)
         {
             g.drawString(s, i + (((TAPPANEL_WIDTH / TAP_COUNT) -  fontmetrics.stringWidth(s)) / 2), j + 16);
@@ -133,12 +138,12 @@ public class Border extends Canvas implements CommonSettings
     {
         int i = size().width;
         int j = size().height;
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.fillRect(0, 0, size().width, size().height);
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.drawLine(1, 1, 1, j + 1);
         g.drawLine(1, 1, i - 3, 1);
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.drawLine(0, 0, i, 0);
         g.drawLine(0, 1, 0, j + 1);
         g.fillRect(2, 2, bsize, j);
@@ -146,7 +151,7 @@ public class Border extends Canvas implements CommonSettings
         g.setColor(Color.gray);
         g.drawLine(bsize + 2, bsize + 3, i - (bsize + 2), bsize + 3);
         g.drawLine(i - 2, 1, i - 2, j + 1);
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.drawLine(bsize + 3, bsize + 4, i - (bsize + 3), bsize + 4);
         g.drawLine(i - 1, 1, i - 1, j + 1);
     }
@@ -162,14 +167,14 @@ public class Border extends Canvas implements CommonSettings
     public void DrawVertical(Graphics g)
     {
         int i = size().height;
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(0, 0, 0, i);
         g.fillRect(2, 0, bsize, i);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(1, 0, 1, i);
         g.setColor(Color.gray);
         g.drawLine(bsize + 2, 0, bsize + 2, i);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(bsize + 3, 0, bsize + 3, i);
     }
 	
@@ -209,25 +214,25 @@ public class Border extends Canvas implements CommonSettings
         int k = size().height;
         int l = k - (bsize + 4);
 
-        g.setColor(chatclient.ColorMap[0]);
+        g.setColor(Color.white);
         g.fillRect(0, 0, i, k);
         g.setFont(parent.textFont);
         fontmetrics = g.getFontMetrics();
         fontmetrics.getHeight();
         int i1 = parent.xofs + 1;
         byte byte0 = 7;
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.fillRect(0, l, i, k);
         g.drawLine(0, l, 0, k + 1);
         g.fillRect(2, l + 1, bsize, k);
         g.fillRect(bsize + 2, l + 1, i - bsize, bsize);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(1, l, 1, k + 1);
         g.drawLine(1, l, i - 3, l);
         g.setColor(Color.gray);
         g.drawLine(bsize + 2, l + bsize + 2, i - (bsize + 2), l + bsize + 2);
         g.drawLine(i - 2, l, i - 2, k + 1);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(bsize + 3, l + bsize + 3, i - (bsize + 3), l + bsize + 3);
         g.drawLine(i - 1, l, i - 1, k + 1);
         parent.tabPos.removeAllElements();
@@ -251,17 +256,17 @@ public class Border extends Canvas implements CommonSettings
 
     public void DrawHorizontal(Graphics g)
     {
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.fillRect(0, 0, width, height);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         int i = width - 8;
         g.drawLine(0, 1, i, 1);
         g.fillRect(i, 0, 1, 1);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(6, 0, 6, 0);
         g.drawLine(1, 6, width - 2, 6);
         g.drawLine(width - 2, 0, width - 2, height - 2);
-        g.setColor(chatclient.ColorMap[2]);
+        g.setColor(Color.white);
         g.drawLine(1, 7, width - 1, 7);
         g.drawLine(width - 1, 0, width - 1, height - 1);
     }

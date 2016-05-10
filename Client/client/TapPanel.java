@@ -1,9 +1,17 @@
+package client;
+
+import gui.ScrollView;
+import gui.BorderPanel;
+import gui.HistoryFrame;
+import gui.MessageCanvas;
 import java.awt.Panel;
 import java.awt.CardLayout;
 import java.awt.BorderLayout;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 public class TapPanel extends Panel implements CommonSettings,ActionListener
@@ -15,6 +23,8 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
     protected ListViewCanvas UserCanvas,RoomCanvas;
     JButton CmdChangeRoom, CmdIgnoreUser, CmdSendDirect, CmdHistory, CmdSendFile;
 		HistoryFrame historyFrame;
+		
+		MessageCanvas messagecanvas;
     
     // Konstruktor
     TapPanel(Client parent)
@@ -114,11 +124,10 @@ public class TapPanel extends Panel implements CommonSettings,ActionListener
         }
 				//Historia
 				if(evt.getSource().equals(CmdHistory))
-				{
-					//historyFrame.setLocation(this.getLocation());
 					chatclient.historyFrame.setVisible(true);
-				}
+
+				// Wysyłanie pliku
+				if(evt.getSource().equals(CmdSendFile))
+					UserCanvas.SendFile();
     }
-
-
 }

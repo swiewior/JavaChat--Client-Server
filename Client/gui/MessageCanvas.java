@@ -1,3 +1,9 @@
+package gui;
+
+import client.Client;
+import client.CommonSettings;
+import client.MessageObject;
+import gui.ScrollView;
 import java.awt.*;
 import java.util.*;
 
@@ -10,8 +16,8 @@ public class MessageCanvas extends Canvas implements CommonSettings
   Client chatclient;  
   ArrayList MessageArray;
   int G_ILoop,XOffset,YOffset,HorizantalSpace;
-  MessageObject messageobject;
-  ScrollView scrollview;  
+  public MessageObject messageobject;
+  public ScrollView scrollview;  
   FontMetrics fontmetrics; 
   int TotalWidth,MessageCount,TotalHeight;
   Font UserNameFont,TextFont;
@@ -19,10 +25,9 @@ public class MessageCanvas extends Canvas implements CommonSettings
   String TokenString;
   
   // Konstruktor
-  MessageCanvas(Client Parent)
+  public MessageCanvas(Client Parent)
   {
     chatclient = Parent;		
-    // Czekanie na załadowanie czatu
     dimension = chatclient.getSize();		
     MessageArray = new ArrayList();
     MessageCount = 0;			
@@ -35,7 +40,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
   }
 
   // Wyczyść wszystko
-  protected void ClearAll()
+  public void ClearAll()
   {
     MessageArray.clear();
     TotalWidth = 0;
@@ -45,7 +50,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
   }
 
 
-  protected void AddMessageToMessageObject(String Message, int MessageType)
+  public void AddMessageToMessageObject(String Message, int MessageType)
   {	
 
     String m_Message="";

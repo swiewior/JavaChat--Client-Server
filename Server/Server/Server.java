@@ -144,7 +144,7 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
         try {
             dataoutputstream = new DataOutputStream(clientsocket.getOutputStream());			
             dataoutputstream.write((message+"\r\n").getBytes());
-            System.out.println ( "Wysyłam: " +message);
+            System.out.println ( "SendMessageToClient: " + message + "\n");
         }catch(IOException _IOExc) { }
     }
 
@@ -370,6 +370,29 @@ public class Server extends Frame implements Serializable, ActionListener, Runna
             messagearraylist.clear();		
         }
     }
+		
+		protected void SendFileRequest(String sender, String recipient, String filename)
+		{
+			clientobject = GetClientObject(recipient);
+			if(clientobject != null)
+				SendMessageToClient(clientobject.getSocket(), "UPRQ " + sender + "~" + 
+								recipient + ":" + filename);
+
+			else
+				System.out.println ( "clientobject == null");
+		}
+		
+		protected void SendFileResponse(String sender, String recipient, String port)
+		{
+			clientobject = GetClientObject(recipient);
+			String IP = clientobject.getSocket().getInetAddress().getHostAddress();
+			
+			if(clientobject != null)
+				SendMessageToClient(clientobject.getSocket(), "UPRS " + IP + "~" + 
+								recipient + ":" + port);
+			else
+				System.out.println ( "clientobject == null");
+		}
 
     // Wysyłanie prywatnej wiadomości
     protected void SendPrivateMessage(String Message , String ToUserName)

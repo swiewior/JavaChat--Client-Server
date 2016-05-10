@@ -1,3 +1,6 @@
+package client;
+
+import gui.HistoryFrame;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +59,8 @@ public class History
 		System.out.println("Exceptionmodify xml");
 	  }
 	}
+	
+	
   
 	// Wypełnianie tablicy z pliku historii na początku programu
   public void FillTable(HistoryFrame frame){
@@ -121,6 +126,7 @@ public class History
 		return nValue.getNodeValue();
 	}
 	
+	// Czyszczenie pliku
 	public void ClearFile()
 	{
 		try (PrintWriter writer = new PrintWriter(filePath)) {

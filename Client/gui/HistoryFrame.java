@@ -1,4 +1,7 @@
+package gui;
 
+
+import client.History;
 import javax.swing.table.DefaultTableModel;
 
 public class HistoryFrame extends javax.swing.JFrame {

@@ -1,3 +1,5 @@
+package client;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.io.*;
@@ -31,7 +33,7 @@ public class InformationDialog extends Dialog implements ActionListener
     public void windowClosing(WindowEvent e) {setVisible(false);}});
 
     Panel ButtonPanel = new Panel(new GridLayout(5,2,15,15));				
-    ButtonPanel.setBackground(chatclient.ColorMap[0]);
+    ButtonPanel.setBackground(Color.white);
 
     Label LblUserName = new Label("Nick: ");
     TxtUserName = new TextField(properties.getProperty("user"));

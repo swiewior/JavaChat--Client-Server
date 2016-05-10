@@ -1,3 +1,7 @@
+package client;
+
+import gui.MessageCanvas;
+import gui.ScrollView;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JButton;
@@ -18,7 +22,7 @@ public class PrivateChat extends Frame implements CommonSettings,KeyListener,Act
     client = Parent;
     UserName = ToUserName;
     setTitle("Prywatna rozmowa z "+UserName); 	
-    setBackground(client.ColorMap[0]);
+    setBackground(Color.white);
     setFont(client.getFont());
     InitializeComponents();
     
@@ -32,7 +36,7 @@ public class PrivateChat extends Frame implements CommonSettings,KeyListener,Act
   {
     setLayout(null);
     Label LblConversation = new Label("Prywatna rozmowa z "+UserName);
-    LblConversation.setForeground(client.ColorMap[5]);
+    LblConversation.setForeground(Color.black);
     LblConversation.setBounds(5, 30, 400, 20);
     add(LblConversation);
 
