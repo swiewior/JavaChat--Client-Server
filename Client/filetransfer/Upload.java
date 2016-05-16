@@ -9,29 +9,31 @@ import java.util.logging.Logger;
 
 public class Upload implements Runnable, CommonSettings{
 
-    public String addr;
-    public int port;
-    public Socket socket;
-    public FileInputStream fileInput;
-    public OutputStream Out;
-    public File file;
-		MessageCanvas messageCanvas;
-    //public ChatFrame ui;
-    
-    public Upload(String addr, int port, File filepath, MessageCanvas mc){
-        super();
-        try {
-					file = filepath;
-					messageCanvas = mc;
-					socket = new Socket(InetAddress.getByName(addr), port);
-					Out = socket.getOutputStream();
-					fileInput = new FileInputStream(filepath);
-        } 
-        catch (Exception ex) {
-            System.out.println("Exception [Upload : Upload(...)] "+ex);
-        }
-    }
-    
+	public String addr;
+	public int port;
+	public Socket socket;
+	public FileInputStream fileInput;
+	public OutputStream Out;
+	public File file;
+	MessageCanvas messageCanvas;
+	//private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
+	private static final Logger LOG = Logger.getLogger( Upload.class.getName() );
+
+	public Upload(String addr, int port, File filepath, MessageCanvas mc){
+			super();		
+
+			try {
+				file = filepath;
+				messageCanvas = mc;
+				socket = new Socket(InetAddress.getByName(addr), port);
+				Out = socket.getOutputStream();
+				fileInput = new FileInputStream(filepath);
+			} 
+			catch (Exception e) {
+				LOG.log(Level.SEVERE, "Upload::Upload: ", e);
+			}
+		}
+		
 	@Override
 	public void run()
 	{
@@ -53,9 +55,8 @@ public class Upload implements Runnable, CommonSettings{
 			if(Out != null){ Out.close(); }
 			if(socket != null){ socket.close(); }
 		}
-		catch (Exception ex) {
-			System.out.println("Exception [Upload : run()]");
-			ex.printStackTrace();
+		catch (Exception e) {
+			LOG.log(Level.SEVERE, "Upload::run: ", e);
 		}
 	}
 }

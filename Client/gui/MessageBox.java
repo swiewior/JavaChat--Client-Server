@@ -10,73 +10,73 @@ import javax.swing.JButton;
 
 public class MessageBox extends Dialog implements ActionListener,CommonSettings 
 {  
-    // Zmienne globalne
-    Client chatclient;
-    JButton CmdOk, CmdCancel;
-    MessageCanvas messagecanvas;
-    ScrollView MessageScrollView;
-   
-    public MessageBox(Client Parent,boolean okcan)
-    {
-       super(Parent, "Informacje", false);
-       chatclient = Parent;
-       setBackground(Color.white);
-       setLayout(new BorderLayout());	 
-       setFont(chatclient.getFont());  
-       messagecanvas = new MessageCanvas(chatclient);
-       MessageScrollView = new ScrollView(messagecanvas,true,true,200,100,0);
-       messagecanvas.scrollview = MessageScrollView;
-       messagecanvas.setBackground(Color.white);	   	
-       add("Center",MessageScrollView);	   	   
-       addOKCancelPanel(okcan);
-       createFrame();	  
-       pack();
-       setVisible(true);
-       setSize(200,160);
-       setResizable(false);
-    }
+	// Zmienne globalne
+	Client chatclient;
+	JButton CmdOk, CmdCancel;
+	MessageCanvas messagecanvas;
+	ScrollView MessageScrollView;
+	 
+	public MessageBox(Client Parent,boolean okcan)
+	{
+		super(Parent, "Informacje", false);
+		chatclient = Parent;
+		setBackground(Color.white);
+		setLayout(new BorderLayout());	 
+		setFont(chatclient.getFont());  
+		messagecanvas = new MessageCanvas(chatclient);
+		MessageScrollView = new ScrollView(messagecanvas,true,true,200,100,0);
+		messagecanvas.scrollview = MessageScrollView;
+		messagecanvas.setBackground(Color.white);	   	
+		add("Center",MessageScrollView);	   	   
+		addOKCancelPanel(okcan);
+		createFrame();	  
+		pack();
+		setVisible(true);
+		setSize(200,160);
+		setResizable(false);
+	}
 
-    public void AddMessage(String message)
-    {	
-        messagecanvas.AddMessageToMessageObject(message,MESSAGE_TYPE_JOIN);		
-    }
+	public void AddMessage(String message)
+	{	
+		messagecanvas.AddMessageToMessageObject(message,MESSAGE_TYPE_JOIN);	
+	}
 
-    private void addOKCancelPanel( boolean okcan ) 
-    {
-        Panel panel = new Panel();
-        panel.setLayout(new FlowLayout());
-        createOKButton( panel);
-        if (okcan == true)
-        createCancelButton( panel );
-        add("South",panel);
-    }
+	private void addOKCancelPanel( boolean okcan ) 
+	{
+		Panel panel = new Panel();
+		panel.setLayout(new FlowLayout());
+		createOKButton( panel);
+		if (okcan == true)
+		createCancelButton( panel );
+		add("South",panel);
+	}
 
-    private void createOKButton(Panel panel) 
-    {
-          CmdOk = new JButton("OK");   	
-          panel.add(CmdOk);
-          CmdOk.addActionListener(this); 
-    }
+	private void createOKButton(Panel panel) 
+	{
+		CmdOk = new JButton("OK");   	
+		panel.add(CmdOk);
+		CmdOk.addActionListener(this); 
+	}
 
-    private void createCancelButton(Panel panel) 
-    {
-          CmdCancel = new JButton("Anuluj");
-          panel.add(CmdCancel);
-          CmdCancel.addActionListener(this);
-    }
+	private void createCancelButton(Panel panel) 
+	{
+		CmdCancel = new JButton("Anuluj");
+		panel.add(CmdCancel);
+		CmdCancel.addActionListener(this);
+	}
 
-    private void createFrame() 
-    {
-          Dimension dimension = getToolkit().getScreenSize();
-          setLocation(dimension.width/3,dimension.height/3);
-    }
+	private void createFrame() 
+	{
+		Dimension dimension = getToolkit().getScreenSize();
+		setLocation(dimension.width/3,dimension.height/3);
+	}
 
-    public void actionPerformed(ActionEvent ae)
-    {
-     if(ae.getSource() == CmdOk)      
-       dispose();
-     else if(ae.getSource() == CmdCancel) 
-       dispose();
-    }
+	public void actionPerformed(ActionEvent ae)
+	{
+		if(ae.getSource() == CmdOk)      
+			dispose();
+		else if(ae.getSource() == CmdCancel) 
+			dispose();
+	}
 
  }

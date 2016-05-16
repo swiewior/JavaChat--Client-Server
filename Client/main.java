@@ -2,11 +2,13 @@
 
 
 import client.Client;
+import client.ClientLogger;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class main {
-    
-    public static void main(String args[]) {
+		
+		public static void main(String args[]) {
 			/*RandomAccessFile file = new RandomAccessFile(new File("Historia.dat"), "rw");
 			
 			file.seek(0);
@@ -26,11 +28,17 @@ public class main {
 			file.seek(100);
 			file.writeUTF(text);
 			*/
+		// Zapis logów
+		try {		
+			ClientLogger.setup();
+		} catch (SecurityException | IOException	e) {	
+				e.printStackTrace(System.out);	 
+		}	
 			
-      Client mainFrame = new Client();	
+			Client mainFrame = new Client();	
 
 			
-    }
+		}
 }
 
 /* KONWENCJA NAZEWNICTWA

@@ -2,8 +2,6 @@ package client;
 
 import gui.HistoryFrame;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -16,59 +14,61 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class History 
 {
-  
-  public String filePath;
-  
-  public History(String filePath)
+	private static final Logger LOG = Logger.getLogger( History.class.getName() );
+	public String filePath;
+	
+	public History(String filePath)
 	{
-    this.filePath = filePath;
-  }
-  
+		
+		this.filePath = filePath;
+	}
+	
 	//Dodanie elementu do pliku historii
-  public void addMessage(String UserName, String TextMessage, String UserRoom, String Time){
-
-    try {
-      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.parse(filePath);
+	public void addMessage(String UserName, String TextMessage, String UserRoom, String Time)
+	{
+		try {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			Document doc = docBuilder.parse(filePath);
 			
-      Node data = doc.getFirstChild();
-      
-      Element message = doc.createElement("message");
-      Element _sender = doc.createElement("sender"); _sender.setTextContent(UserName);
-      Element _content = doc.createElement("content"); _content.setTextContent(TextMessage);
-      Element _recipient = doc.createElement("recipient"); _recipient.setTextContent(UserRoom);
-      Element _time = doc.createElement("time"); _time.setTextContent(Time);
-      
-      message.appendChild(_sender); 
+			Node data = doc.getFirstChild();
+			
+			Element message = doc.createElement("message");
+			Element _sender = doc.createElement("sender"); _sender.setTextContent(UserName);
+			Element _content = doc.createElement("content"); _content.setTextContent(TextMessage);
+			Element _recipient = doc.createElement("recipient"); _recipient.setTextContent(UserRoom);
+			Element _time = doc.createElement("time"); _time.setTextContent(Time);
+			
+			message.appendChild(_sender); 
 			message.appendChild(_content); 
 			message.appendChild(_recipient); 
 			message.appendChild(_time);
-      data.appendChild(message);
-      
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(new File(filePath));
-      transformer.transform(source, result);
- 
-	  } 
-      catch(Exception ex){
-		System.out.println("Exceptionmodify xml");
-	  }
+			data.appendChild(message);
+			
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(new File(filePath));
+			transformer.transform(source, result);
+		} 
+			catch(Exception e)
+			{
+				LOG.log(Level.WARNING, "History::addMessage: ", e);
+				System.out.println("Exceptionmodify xml");
+		}
 	}
 	
-	
-  
 	// Wypełnianie tablicy z pliku historii na początku programu
-  public void FillTable(HistoryFrame frame){
-   
-    DefaultTableModel model = (DefaultTableModel) frame.jTable1.getModel();
-  
-    try{
-      File fXmlFile = new File(filePath);
+	public void FillTable(HistoryFrame frame){
+		DefaultTableModel model = (DefaultTableModel) frame.jTable1.getModel();
+	
+		try{
+			File fXmlFile = new File(filePath);
 			
 			if(fXmlFile.exists() && !fXmlFile.isDirectory())
 			{
@@ -95,8 +95,7 @@ public class History
 					}
 				}
 			}
-			else
-			{
+			else {
 				//Tworzenie nowego pliku ze strukturą XML
 				fXmlFile.createNewFile();
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -112,23 +111,22 @@ public class History
 				transformer.transform(source, result);
 			}
 				
-    }
-    catch(Exception ex){
-      System.out.println("Filling Exception");
-    }
+		}
+		catch(Exception e) {
+			LOG.log(Level.WARNING, "History::FillTable: ", e);
+			System.out.println("Filling Exception");
+		}
 
-  }
+	}
 
-	public static String getTagValue(String sTag, Element eElement) 
-	{
+	public static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
 		Node nValue = (Node) nlList.item(0);
 		return nValue.getNodeValue();
 	}
 	
 	// Czyszczenie pliku
-	public void ClearFile()
-	{
+	public void ClearFile() {
 		try (PrintWriter writer = new PrintWriter(filePath)) {
 			writer.print("");
 			writer.close();
@@ -144,12 +142,14 @@ public class History
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(new File(filePath));
 			transformer.transform(source, result);
-		} catch (FileNotFoundException | ParserConfigurationException ex) {
-			Logger.getLogger(History.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (TransformerConfigurationException ex) {
-			Logger.getLogger(History.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (TransformerException ex) {
-			Logger.getLogger(History.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (FileNotFoundException | ParserConfigurationException e) {
+			LOG.log(Level.WARNING, "History::ClearFile FileNotFoundException | "
+				+ "ParserConfigurationException: ", e);
+		} catch (TransformerConfigurationException e) {
+			LOG.log(Level.WARNING, "History::ClearFile "
+				+ "TransformerConfigurationException: ", e);
+		} catch (TransformerException e) {
+			LOG.log(Level.WARNING, "History::ClearFile TransformerException: ", e);
 		}
 	}
 }

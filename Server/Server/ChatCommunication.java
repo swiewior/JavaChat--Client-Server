@@ -4,111 +4,111 @@ import java.net.Socket;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ChatCommunication implements Runnable,CommonSettings
 {
-  // Zmienne globalne
-  Thread thread;
-  Socket socket;
-  DataInputStream inputstream;
-  String RFC, filesharing_username;
-  Server Parent;	
-  
-  // Inicjalizacja socketa do klienta
-  ChatCommunication(Server chatserver, Socket clientsocket)
-  {				
-    Parent = chatserver;
-    socket = clientsocket;	
-    try {	
-      inputstream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));		
-    }catch(IOException _IOExc) { System.out.println ( "ChatCommunictaion exception inputstream: " + _IOExc);}
-    thread = new Thread(this);
-    thread.start();	
-  }
+	// Zmienne globalne
+	Thread thread;
+	Socket socket;
+	DataInputStream inputstream;
+	String RFC, filesharing_username;
+	Server Parent;	
+	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); 
+	
+	// Inicjalizacja socketa do klienta
+	ChatCommunication(Server chatserver, Socket clientsocket)
+	{				
 
-  // Implementacja interfejsu wątków
-  @Override
-  public void run()
-  {
-    while(thread != null)
-    {
-      try {				
-        RFC = inputstream.readLine();
-				System.out.println ( "RFC: "+RFC);
-        // Obsługa tokenów
-        if(RFC.startsWith("HELO")) {		
-          System.out.println ( "HELO");
-          Parent.AddUser(socket,RFC.substring(5));														
-        }
+		Parent = chatserver;
+		socket = clientsocket;	
+		try {	
+			inputstream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));		
+		}catch(IOException e) { 
+			LOG.log(Level.WARNING, "ChatCommunication::ChatCommunication: ", e);
+		}
+		thread = new Thread(this);
+		thread.start();	
+	}
 
-        if(RFC.startsWith("QUIT")) {
-          Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),REMOVE_USER);
-           System.out.println ( "QUIT");
-          QuitConnection();	
-        }
+	// Implementacja interfejsu wątków
+	@Override
+	public void run()
+	{
+		while(thread != null)
+		{
+			try {				
+				RFC = inputstream.readLine();
+				LOG.log(Level.INFO, "RFC: " + RFC);
+				// Obsługa tokenów
+				if(RFC.startsWith("HELO")) {	
+					LOG.log(Level.INFO, "HELO");
+					Parent.AddUser(socket,RFC.substring(5));														
+				}
+
+				if(RFC.startsWith("QUIT")) {
+					Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),REMOVE_USER);
+					LOG.log(Level.INFO, "QUIT");
+					QuitConnection();	
+				}
 								
-        if(RFC.startsWith("KICK")) {
-          Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),KICK_USER);
-           System.out.println ( "KICK");
-          QuitConnection();
-        }
+				if(RFC.startsWith("KICK")) {
+					Parent.RemoveUser(RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1),KICK_USER);
+					LOG.log(Level.INFO, "KICK");
+					QuitConnection();
+				}
 
-        if(RFC.startsWith("CHRO")) {
-          Parent.ChangeRoom(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
-					System.out.println ( "CHRO");
-        }
+				if(RFC.startsWith("CHRO")) {
+					Parent.ChangeRoom(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
+					LOG.log(Level.INFO, "CHRO");
+				}
 
-        if(RFC.startsWith("MESS")) {
-          Parent.SendGeneralMessage(socket,RFC.substring(RFC.indexOf(":")+1),
-									RFC.substring(RFC.indexOf("~")+1,RFC.indexOf(":")),RFC.substring(5,RFC.indexOf("~")));	
-					System.out.println ( "MESS");
-        }
+				if(RFC.startsWith("MESS")) {
+					Parent.SendGeneralMessage(socket,RFC.substring(RFC.indexOf(":")+1),
+									RFC.substring(RFC.indexOf("~")+1,RFC.indexOf(":")),RFC.substring(5,RFC.indexOf("~")));
+					LOG.log(Level.INFO, "MESS");
+				}
 
-        if(RFC.startsWith("PRIV")) {
-            Parent.SendPrivateMessage(RFC.substring(RFC.indexOf("~")+1),RFC.substring(5,RFC.indexOf("~")));	
-						System.out.println ( "PRIV");
-        }
+				if(RFC.startsWith("PRIV")) {
+					Parent.SendPrivateMessage(RFC.substring(RFC.indexOf("~")+1),RFC.substring(5,RFC.indexOf("~")));	
+					LOG.log(Level.INFO, "PRIV");
+				}
 
-        if(RFC.startsWith("ROCO")) {
-          Parent.GetUserCount(socket,RFC.substring(5));	
-					System.out.println ( "ROCO");
-        }
+				if(RFC.startsWith("ROCO")) {
+					Parent.GetUserCount(socket,RFC.substring(5));	
+					LOG.log(Level.INFO, "ROCO");
+				}
 
 				if(RFC.startsWith("UPRQ")){
-					System.out.println ( "UPRQ");
+					LOG.log(Level.INFO, "UPRQ");
 					Parent.SendFileRequest(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
 				}
 
 				if(RFC.startsWith("UPRS")){
-					System.out.println ( "UPRS");
+					LOG.log(Level.INFO, "UPRS");
 					Parent.SendFileResponse(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
 				}
 
-      } catch(Exception _Exc) { System.out.println ( "Nieobsłużony wskaźnik: "+_Exc); 
-			Parent.RemoveUserWhenException(socket);QuitConnection(); 
-					}	
-    }
-  }
+			} catch(Exception e) { 
+					LOG.log(Level.SEVERE, "ChatCommunication::run: ", e);
+					Parent.RemoveUserWhenException(socket);
+					QuitConnection(); 
+			}	
+		}
+	}
 
-  private void QuitConnection()
-  {
-    thread.stop();
-    thread = null;		
-    try {
-    socket.close();
-    }catch(IOException _IOExc) { }
-    socket = null;	
-  }
+	private void QuitConnection()
+	{
+		thread.stop();
+		thread = null;		
+		try {
+		socket.close();
+		}catch(IOException e) {
+			LOG.log(Level.WARNING, "ChatCommunication::QuitConnection: ", e);
+		}
+		socket = null;	
+	}
 }
-
-/*
-        if(RFC.startsWith("REIP")) {
-          Parent.GetRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
-        }
-
-        if(RFC.startsWith("AEIP")) {
-          Parent.SendRemoteUserAddress(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
-        }	
-*/
