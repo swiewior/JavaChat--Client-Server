@@ -15,10 +15,12 @@ import java.net.Socket;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 import java.util.Date;
+import java.util.Optional;
 import javax.swing.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import javafx.scene.control.TextInputDialog;
 import javax.swing.ButtonGroup;
 
 
@@ -49,7 +51,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 	protected int PrivateWindowCount;
 	InformationDialog dialog;
 	Toolkit toolkit;
-	JMenuItem loginitem, disconnectitem, seperatoritem, quititem, aboutitem;
+	JMenuItem loginitem, disconnectitem, seperatoritem, quititem, aboutitem, registeritem;
 	JRadioButtonMenuItem logOff, logSevere, logWarning, logInfo;
 	
 	public History hist;
@@ -58,7 +60,6 @@ public class Client extends JFrame implements Serializable, Runnable,
 	public String TransferFile;
 	
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
-	//private static final Logger LOG = Logger.getLogger( Client.class.getName() );
 	
 	public Client() 
 	{		
@@ -81,11 +82,14 @@ public class Client extends JFrame implements Serializable, Runnable,
 		JMenu loginmenu = new JMenu("Połączenie");		
 		loginitem = new JMenuItem("Zaloguj");
 		loginitem.addActionListener(this);
+		registeritem = new JMenuItem("Rejestracja");
+		registeritem.addActionListener(this);
 		disconnectitem = new JMenuItem("Rozłącz");
 		disconnectitem.addActionListener(this);
 		quititem = new JMenuItem("Wyjście");
 		quititem.addActionListener(this);
 		loginmenu.add(loginitem);
+		loginmenu.add(registeritem);
 		loginmenu.add(disconnectitem);
 		loginmenu.addSeparator();
 		loginmenu.add(quititem);
@@ -258,6 +262,23 @@ public class Client extends JFrame implements Serializable, Runnable,
 			ConnectToServer();				
 		}		
 	}
+	
+	private void RegisterAccount()
+	{
+		TextInputDialog regDialog = new TextInputDialog("walter");
+		regDialog.setTitle("Register Account");
+		regDialog.setHeaderText("Look, a Text Input Dialog");
+		regDialog.setContentText("Please enter your name:");
+
+// Traditional way to get the response value.
+Optional<String> result = regDialog.showAndWait();
+if (result.isPresent()){
+    System.out.println("Your name: " + result.get());
+}
+
+// The Java 8 way to get the response value (with lambda expression).
+result.ifPresent(name -> System.out.println("Your name: " + name));
+	}
 
 	// Eventy przycisków
 	@Override
@@ -275,6 +296,9 @@ public class Client extends JFrame implements Serializable, Runnable,
 
 		if(evt.getSource().equals(loginitem)) {
 			LoginToChat();				
+		}
+		if(evt.getSource().equals(registeritem)) {
+			RegisterAccount();				
 		}
 
 		if(evt.getSource().equals(disconnectitem)) {			

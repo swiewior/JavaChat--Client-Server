@@ -6,22 +6,24 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JButton;
+import javax.swing.*;
 
-public class InformationDialog extends Dialog implements ActionListener
+public class InformationDialog extends JDialog implements ActionListener
 {
 	Client chatclient;
-	protected TextField TxtUserName,TxtServerName,TxtServerPort, TxtHistoryFile;
-	protected JButton CmdOk,CmdSave;
+	protected JTextField TxtUserName,TxtServerName,TxtServerPort, TxtHistoryFile,
+		txtRegisterNick, txtRegisterPassword;
+	protected JButton CmdOk,CmdSave, CmdRegister;
+	protected JPasswordField TxtPassword;
 	protected Choice roomchoice;
 	protected boolean IsConnect;
+	protected JLabel lblInfo;
 	Properties properties;
-	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); 
-	//private static final Logger LOG = Logger.getLogger( InformationDialog.class.getName() );
+	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 		
 	InformationDialog(Client Parent)
 	{
-		super(Parent,"Java Chat - Login",true);
+		super(Parent,"Java Chat - Login&Register",true);
 		chatclient = Parent;				
 		setFont(chatclient.TextFont);				
 		setLayout(new BorderLayout());
@@ -39,26 +41,33 @@ public class InformationDialog extends Dialog implements ActionListener
 			}
 		}
 
-
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {setVisible(false);}
 		});
 
-		Panel ButtonPanel = new Panel(new GridLayout(5,2,15,15));				
+		JTabbedPane tabPanel = new JTabbedPane();
+		
+		//Zakładka Logowania
+		JPanel ButtonPanel = new JPanel(new GridLayout(6,2,15,15));				
 		ButtonPanel.setBackground(Color.white);
 
-		Label LblUserName = new Label("Nick: ");
-		TxtUserName = new TextField(properties.getProperty("user"));
+		JLabel LblUserName = new JLabel("Nick: ");
+		TxtUserName = new JTextField(properties.getProperty("user"));
 		if (properties.getProperty("user") != null)
 			TxtUserName.setText(properties.getProperty("user"));
 		else
 			TxtUserName.setText("user");
 		ButtonPanel.add(LblUserName);
 		ButtonPanel.add(TxtUserName);
+		
+		JLabel LblPassword = new JLabel("Hasło: ");
+		TxtPassword = new JPasswordField(properties.getProperty("password"));
+		ButtonPanel.add(LblPassword);
+		ButtonPanel.add(TxtPassword);
 
-		Label LblServerName = new Label("Adres serwera: ");
-		TxtServerName = new TextField();
+		JLabel LblServerName = new JLabel("Adres serwera: ");
+		TxtServerName = new JTextField();
 		if (properties.getProperty("server") != null)
 			TxtServerName.setText(properties.getProperty("server"));
 		else
@@ -66,8 +75,8 @@ public class InformationDialog extends Dialog implements ActionListener
 		ButtonPanel.add(LblServerName);
 		ButtonPanel.add(TxtServerName);
 
-		Label LblServerPort = new Label("Port: ");
-		TxtServerPort = new TextField();
+		JLabel LblServerPort = new JLabel("Port: ");
+		TxtServerPort = new JTextField();
 		if (properties.getProperty("port") != null)
 			TxtServerPort.setText(properties.getProperty("port"));
 		else
@@ -75,14 +84,14 @@ public class InformationDialog extends Dialog implements ActionListener
 		ButtonPanel.add(LblServerPort);
 		ButtonPanel.add(TxtServerPort);
 				
-		Label LblHistoryFile = new Label("Plik Historii: ");
-		TxtHistoryFile = new TextField();
+		JLabel LblHistoryFile = new JLabel("Plik Historii: ");
+		TxtHistoryFile = new JTextField();
 		if (properties.getProperty("history") != null)
 			TxtHistoryFile.setText(properties.getProperty("history"));
 		else
 			TxtHistoryFile.setText("src/History.xml");
 		ButtonPanel.add(LblHistoryFile);
-		ButtonPanel.add(TxtHistoryFile);				
+		ButtonPanel.add(TxtHistoryFile);	
 
 		CmdOk = new JButton("Połącz");
 		CmdOk.addActionListener(this);
@@ -90,26 +99,51 @@ public class InformationDialog extends Dialog implements ActionListener
 		CmdSave.addActionListener(this);
 		ButtonPanel.add(CmdOk);
 		ButtonPanel.add(CmdSave);
+		
+		tabPanel.add("Logowanie", ButtonPanel);
+		
+		//Zakładka Rejestracji
+		JPanel RegisterPanel = new JPanel(new GridLayout(5,2,15,15));				
+		RegisterPanel.setBackground(Color.white);
+		
+		JLabel lblRegisterNick = new JLabel("Nick: ");
+		txtRegisterNick = new JTextField(properties.getProperty("reguser"));
+		RegisterPanel.add(lblRegisterNick);
+		RegisterPanel.add(txtRegisterNick);
+		
+		JLabel lblRegisterPassword = new JLabel("Hasło: ");
+		txtRegisterPassword = new JPasswordField(properties.getProperty("regpassword"));
+		RegisterPanel.add(lblRegisterPassword);
+		RegisterPanel.add(txtRegisterPassword);
+		
+		CmdRegister = new JButton("Rejestracja");
+		CmdRegister.addActionListener(this);
+		RegisterPanel.add(CmdRegister);
+		
+		lblInfo = new JLabel();
+		RegisterPanel.add(lblInfo);
+		
+		tabPanel.add("Rejestracja", RegisterPanel);
 
-		add("Center",ButtonPanel);
+		add("Center",tabPanel);
 
-		Panel EmptyNorthPanel = new Panel();
+		JPanel EmptyNorthPanel = new JPanel();
 		EmptyNorthPanel.setBackground(Color.white);
 		add("North",EmptyNorthPanel);
 
-		Panel EmptySouthPanel = new Panel();
+		JPanel EmptySouthPanel = new JPanel();
 		EmptySouthPanel.setBackground(Color.white);
 		add("South",EmptySouthPanel);
 
-		Panel EmptyEastPanel = new Panel();
+		JPanel EmptyEastPanel = new JPanel();
 		EmptyEastPanel.setBackground(Color.white);
 		add("East",EmptyEastPanel);
 
-		Panel EmptyWestPanel = new Panel();
+		JPanel EmptyWestPanel = new JPanel();
 		EmptyWestPanel.setBackground(Color.white);
 		add("West",EmptyWestPanel);
 
-		setSize(250,220);
+		setSize(260,280);
 		chatclient.show();
 		show();				
 	}	
@@ -121,8 +155,6 @@ public class InformationDialog extends Dialog implements ActionListener
 			IsConnect = true;
 			dispose();			
 		}
-
-
 		if (evt.getSource().equals(CmdSave))
 		{
 			FileOutputStream fout=null;
@@ -137,6 +169,12 @@ public class InformationDialog extends Dialog implements ActionListener
 			properties.setProperty("history",TxtHistoryFile.getText());
 			properties.save(fout,"Client Settings");
 		}	
+		if (evt.getSource().equals(CmdRegister))
+		{
+			lblInfo.setText("Zarejestrowano!");
+			lblInfo.setForeground(Color.GREEN);
+			//IsConnect = true;		
+		}
 	}
 	
 
