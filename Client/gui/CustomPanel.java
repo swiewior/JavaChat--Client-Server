@@ -1,9 +1,9 @@
 package gui;
 
-import java.awt.Panel;
 import java.awt.Dimension;
+import javax.swing.JPanel;
 
-class CustomPanel extends Panel
+class CustomPanel extends JPanel
 {
 
 	public CustomPanel(int i, int j)

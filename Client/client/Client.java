@@ -15,14 +15,11 @@ import java.net.Socket;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 import java.util.Date;
-import java.util.Optional;
 import javax.swing.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import javafx.scene.control.TextInputDialog;
 import javax.swing.ButtonGroup;
-
 
 public class Client extends JFrame implements Serializable, Runnable, 
 				KeyListener, ActionListener, CommonSettings 
@@ -72,7 +69,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		dimension = getSize();	
 		setLayout(new BorderLayout());	
 
-		setTitle("Java Chat Client");		
+		setTitle("Java Chat Client");	
 		addWindowListener(new WindowAdapter() {
 		@Override
 		public void windowClosing(WindowEvent evt) { DisconnectChat();System.exit(0);}});
@@ -99,7 +96,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		aboutitem.addActionListener(this);
 		aboutmenu.add(aboutitem);
 		
-		//Ustawienia Logów
+		//Ustawienia menu Logi
 		JMenu logmenu = new JMenu("Logi");
 		ButtonGroup group = new ButtonGroup();
 		
@@ -129,7 +126,6 @@ public class Client extends JFrame implements Serializable, Runnable,
 		menubar.add(logmenu);
 		this.setJMenuBar(menubar);
 		
-
 		// Parametry	
 		UserName = "";			
 		UserRoom = "";
@@ -178,14 +174,14 @@ public class Client extends JFrame implements Serializable, Runnable,
 			dataoutputstream.writeBytes(Message+"\r\n");	
 		}catch(IOException e) { 
 			LOG.log(Level.SEVERE, "Client::SendMessageToServer: ", e);
-			QuitConnection(QUIT_TYPE_DEFAULT);}		
-		System.out.print("SendMessageToServer: '"+Message+"'" + "\n");
+			QuitConnection(QUIT_TYPE_DEFAULT);}
+		LOG.log(Level.INFO, "SendMessageToServer: '"+Message+"'");
 	}
 		
 	private void InitializeAppletComponents()
 	{
 		// Ustawienia okienka
-		setBackground(Color.white);	
+		this.setBackground(Color.white);	
 		Font font = new Font("Dialog",Font.BOLD,11);
 		TextFont = new Font("Dialog",0,11);	
 		setFont(font);	
@@ -194,7 +190,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		JPanel CenterPanel = new JPanel(new BorderLayout());
 		JPanel InformationPanel = new JPanel(new BorderLayout());	
 		InformationPanel.setBackground(Color.white);			
-		InformationLabel = new JLabel();		
+		InformationLabel = new JLabel();
 		InformationLabel.setHorizontalAlignment(JLabel.CENTER);
 
 		InformationLabel.setForeground(Color.black); 
@@ -262,23 +258,6 @@ public class Client extends JFrame implements Serializable, Runnable,
 			ConnectToServer();				
 		}		
 	}
-	
-	private void RegisterAccount()
-	{
-		TextInputDialog regDialog = new TextInputDialog("walter");
-		regDialog.setTitle("Register Account");
-		regDialog.setHeaderText("Look, a Text Input Dialog");
-		regDialog.setContentText("Please enter your name:");
-
-// Traditional way to get the response value.
-Optional<String> result = regDialog.showAndWait();
-if (result.isPresent()){
-    System.out.println("Your name: " + result.get());
-}
-
-// The Java 8 way to get the response value (with lambda expression).
-result.ifPresent(name -> System.out.println("Your name: " + name));
-	}
 
 	// Eventy przycisków
 	@Override
@@ -295,10 +274,7 @@ result.ifPresent(name -> System.out.println("Your name: " + name));
 		}
 
 		if(evt.getSource().equals(loginitem)) {
-			LoginToChat();				
-		}
-		if(evt.getSource().equals(registeritem)) {
-			RegisterAccount();				
+			LoginToChat();
 		}
 
 		if(evt.getSource().equals(disconnectitem)) {			
@@ -382,7 +358,7 @@ result.ifPresent(name -> System.out.println("Your name: " + name));
 			// Obsługa Wskaźników
 			try {
 				ServerData = datainputstream.readLine();	
-				System.out.print("datainputstream: " + ServerData + "\n");
+				LOG.log(Level.INFO, "datainputstream: " + ServerData);
 
 				// Lista użytkowników
 				if(ServerData.startsWith("LIST"))
@@ -570,9 +546,9 @@ result.ifPresent(name -> System.out.println("Your name: " + name));
 				if(ServerData.startsWith("UPRS"))
 				{
 					String sender = ServerData.substring(5,ServerData.indexOf("~"));
-					System.out.print("UPRS: sender = " + sender + "\n");
+					LOG.log(Level.INFO, "UPRS: sender = " + sender);
 					String answer = ServerData.substring(ServerData.indexOf(":")+1);
-					System.out.print("UPRS: answer = " + answer + "\n");
+					LOG.log(Level.INFO, "UPRS: answer = " + answer);
 					
 					if(!answer.equals("NO"))
 					{

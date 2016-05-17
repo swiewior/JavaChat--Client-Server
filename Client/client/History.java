@@ -59,7 +59,6 @@ public class History
 			catch(Exception e)
 			{
 				LOG.log(Level.WARNING, "History::addMessage: ", e);
-				System.out.println("Exceptionmodify xml");
 		}
 	}
 	
@@ -114,7 +113,6 @@ public class History
 		}
 		catch(Exception e) {
 			LOG.log(Level.WARNING, "History::FillTable: ", e);
-			System.out.println("Filling Exception");
 		}
 
 	}

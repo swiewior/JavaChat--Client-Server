@@ -36,7 +36,7 @@ public class Download implements Runnable, CommonSettings {
 	public void run() {
 		try {
 			socket = server.accept();
-			System.out.println("Download : "+socket.getRemoteSocketAddress());
+			LOG.log(Level.INFO, "Download : "+socket.getRemoteSocketAddress());
 			
 			fileInput = socket.getInputStream();
 			fileOutput = new FileOutputStream(saveTo);

@@ -1,8 +1,9 @@
 package gui;
 
 import java.awt.*;
+import javax.swing.JPanel;
 
-public class ScrollView extends Panel
+public class ScrollView extends JPanel
 {
 
 	public void reset()

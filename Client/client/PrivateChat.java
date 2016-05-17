@@ -5,6 +5,7 @@ import gui.ScrollView;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class PrivateChat extends Frame implements CommonSettings,KeyListener,ActionListener
 {
@@ -42,7 +43,7 @@ public class PrivateChat extends Frame implements CommonSettings,KeyListener,Act
 		LblConversation.setBounds(5, 30, 400, 20);
 		add(LblConversation);
 
-		Panel MessagePanel = new Panel(new BorderLayout());
+		JPanel MessagePanel = new JPanel(new BorderLayout());
 		messagecanvas = new MessageCanvas(client);				
 		MessageScrollView = new ScrollView(messagecanvas,
 			true,true,TAPPANEL_CANVAS_WIDTH,TAPPANEL_CANVAS_HEIGHT,SCROLL_BAR_SIZE);

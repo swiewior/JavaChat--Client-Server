@@ -19,6 +19,7 @@ public class InformationDialog extends JDialog implements ActionListener
 	protected boolean IsConnect;
 	protected JLabel lblInfo;
 	Properties properties;
+	public JTabbedPane tabPanel;
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 		
 	InformationDialog(Client Parent)
@@ -46,7 +47,7 @@ public class InformationDialog extends JDialog implements ActionListener
 			public void windowClosing(WindowEvent e) {setVisible(false);}
 		});
 
-		JTabbedPane tabPanel = new JTabbedPane();
+		tabPanel = new JTabbedPane();
 		
 		//Zakładka Logowania
 		JPanel ButtonPanel = new JPanel(new GridLayout(6,2,15,15));				

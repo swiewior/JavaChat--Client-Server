@@ -50,7 +50,7 @@ public class BorderPanel extends JPanel
 		Border border = new Border(Cframe, chatclient , this, 2, j);
 		gridbaglayout.setConstraints(border, gridbagconstraints);
 		add(border);
-		Panel panel1 = new Panel();
+		JPanel panel1 = new JPanel();
 		GridBagLayout gridbaglayout1 = new GridBagLayout();
 		panel1.setLayout(gridbaglayout1);
 		gridbagconstraints.weightx = 1.0D;

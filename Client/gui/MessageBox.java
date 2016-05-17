@@ -6,9 +6,10 @@ import gui.MessageCanvas;
 import gui.ScrollView;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JButton;
+import javax.swing.*;
+import javax.swing.JPanel;
 
-public class MessageBox extends Dialog implements ActionListener,CommonSettings 
+public class MessageBox extends JDialog implements ActionListener,CommonSettings 
 {  
 	// Zmienne globalne
 	Client chatclient;
@@ -43,7 +44,7 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
 
 	private void addOKCancelPanel( boolean okcan ) 
 	{
-		Panel panel = new Panel();
+		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 		createOKButton( panel);
 		if (okcan == true)
@@ -51,14 +52,14 @@ public class MessageBox extends Dialog implements ActionListener,CommonSettings
 		add("South",panel);
 	}
 
-	private void createOKButton(Panel panel) 
+	private void createOKButton(JPanel panel) 
 	{
 		CmdOk = new JButton("OK");   	
 		panel.add(CmdOk);
 		CmdOk.addActionListener(this); 
 	}
 
-	private void createCancelButton(Panel panel) 
+	private void createCancelButton(JPanel panel) 
 	{
 		CmdCancel = new JButton("Anuluj");
 		panel.add(CmdCancel);
