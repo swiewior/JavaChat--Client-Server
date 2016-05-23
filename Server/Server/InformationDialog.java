@@ -102,7 +102,7 @@ public class InformationDialog extends Dialog implements ActionListener
 		{
 			FileOutputStream fout=null;
 			try {		
-				fout = new FileOutputStream(new File("src/server.properties"));			
+				fout = new FileOutputStream(new File("server.properties"));			
 			}catch(java.io.IOException e) {
 				LOG.log(Level.WARNING, "InformationDialog::actionPerformed: ", e);
 			}

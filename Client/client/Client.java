@@ -12,6 +12,8 @@ import java.awt.event.*;
 import java.util.StringTokenizer;
 import java.io.*;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 import java.util.Date;
@@ -26,7 +28,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 {
 	// Zmienne globalne
 	String UserName,UserRoom,ServerName,AppletStatus,ChatLogo,BannerName,
-					ServerData,RoomList,SplitString;
+					ServerData,RoomList,SplitString, Password;
 	int ServerPort,IconCount,TotalUserCount,G_ILoop;
 	boolean StartFlag;	
 	Socket socket;
@@ -79,14 +81,11 @@ public class Client extends JFrame implements Serializable, Runnable,
 		JMenu loginmenu = new JMenu("Połączenie");		
 		loginitem = new JMenuItem("Zaloguj");
 		loginitem.addActionListener(this);
-		registeritem = new JMenuItem("Rejestracja");
-		registeritem.addActionListener(this);
 		disconnectitem = new JMenuItem("Rozłącz");
 		disconnectitem.addActionListener(this);
 		quititem = new JMenuItem("Wyjście");
 		quititem.addActionListener(this);
 		loginmenu.add(loginitem);
-		loginmenu.add(registeritem);
 		loginmenu.add(disconnectitem);
 		loginmenu.addSeparator();
 		loginmenu.add(quititem);
@@ -141,44 +140,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		InitializeAppletComponents();	// Inicjalizacja wszystkich komponentów
 	}
 	
-	private void ConnectToServer()
-	{
-		messagecanvas.ClearAll();
-		LOG.log(Level.INFO, "Łączę z serwerem... ");
-		messagecanvas.AddMessageToMessageObject("Łączę z serwerem... ",MESSAGE_TYPE_ADMIN);	
-		
-		try {
-			hist = new History(HistoryFile);
-			historyFrame = new HistoryFrame(hist);
-			historyFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-			historyFrame.setVisible(false);
-
-			socket = new Socket(ServerName,ServerPort);					
-
-			dataoutputstream = new DataOutputStream(socket.getOutputStream());
-			SendMessageToServer("HELO " +UserName);			
-			datainputstream = new DataInputStream(socket.getInputStream());
-
-			StartFlag = true;
-			thread = new Thread(this);
-			thread.start();				
-			EnableAll();	
-		} catch(IOException e) { 
-			LOG.log(Level.SEVERE, "Client::ConnectToServer: ", e);
-			QuitConnection(QUIT_TYPE_NULL);}			
-	}
-
-	private void SendMessageToServer(String Message)
-	{
-		try {
-			dataoutputstream.writeBytes(Message+"\r\n");	
-		}catch(IOException e) { 
-			LOG.log(Level.SEVERE, "Client::SendMessageToServer: ", e);
-			QuitConnection(QUIT_TYPE_DEFAULT);}
-		LOG.log(Level.INFO, "SendMessageToServer: '"+Message+"'");
-	}
-		
-	private void InitializeAppletComponents()
+		private void InitializeAppletComponents()
 	{
 		// Ustawienia okienka
 		this.setBackground(Color.white);	
@@ -243,22 +205,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		DisableAll();
 		LoginToChat();
 	}
-
-	private void LoginToChat()
-	{
-		// Panel logowania
-		dialog = new InformationDialog(this);	
-		if (dialog.IsConnect == true)
-		{
-			UserName 	= dialog.TxtUserName.getText();
-			ServerName 	= dialog.TxtServerName.getText();
-			ServerPort 	= Integer.parseInt(dialog.TxtServerPort.getText());
-			HistoryFile = dialog.TxtHistoryFile.getText();
-			
-			ConnectToServer();				
-		}		
-	}
-
+		
 	// Eventy przycisków
 	@Override
 	public void actionPerformed(ActionEvent evt)
@@ -307,12 +254,96 @@ public class Client extends JFrame implements Serializable, Runnable,
 			SendMessage();
 		}
 	}
-
 	@Override
 	public void keyTyped(KeyEvent e){}
 	@Override
 	public void keyReleased(KeyEvent e){}
 	
+	public void LoginToChat() {
+		// Panel logowania
+		dialog = new InformationDialog(this);	
+	}
+
+	
+	public void ConnectToServer(InformationDialog d)
+	{
+		dialog = d;
+		messagecanvas.ClearAll();
+		LOG.log(Level.INFO, "Łączę z serwerem... ");
+		messagecanvas.AddMessageToMessageObject("Łączę z serwerem... ",MESSAGE_TYPE_ADMIN);
+		
+		ServerName 	= dialog.TxtServerName.getText();
+		ServerPort 	= Integer.parseInt(dialog.TxtServerPort.getText());
+		
+		try {					
+			socket = new Socket(ServerName,ServerPort);
+			
+			dataoutputstream = new DataOutputStream(socket.getOutputStream());
+			datainputstream = new DataInputStream(socket.getInputStream());
+			StartFlag = true;
+			thread = new Thread(this);
+			thread.start();
+			dialog.setConnectLabel("Połączono!", Color.GREEN);
+			
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, "Połączenie nieudane", e);
+			dialog.setConnectLabel("Połączenie nieudane!", Color.RED);
+		}
+	}
+	
+	public void Register(InformationDialog d)
+	{
+		dialog = d;
+		LOG.log(Level.INFO, "Rejestruję...");
+		messagecanvas.AddMessageToMessageObject("Rejestruję...",MESSAGE_TYPE_ADMIN);
+		dialog.setRegisterLabel("Rejestruję...", Color.BLACK);
+		
+		UserName 	= dialog.txtRegisterNick.getText();
+		Password 	= dialog.txtRegisterPassword.getText();
+
+		String hash = MD5(UserName+Password);
+		SendMessageToServer("REGI " + hash);
+	}
+	
+	public void Login(InformationDialog d)
+	{
+		dialog = d;
+		LOG.log(Level.INFO, "Loguję...");
+		messagecanvas.AddMessageToMessageObject("Loguję...",MESSAGE_TYPE_ADMIN);	
+		
+		UserName 	= dialog.TxtUserName.getText();
+		Password 	= dialog.TxtPassword.getText();
+		HistoryFile = dialog.TxtHistoryFile.getText();
+
+		String hash = MD5(UserName+Password);
+		SendMessageToServer("HELO " + UserName + ":" + hash);		
+	}
+		
+	public String MD5(String md5) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] array = md.digest(md5.getBytes("UTF-8"));
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < array.length; ++i) {
+				sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+			}
+			return sb.toString();
+    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			LOG.log(Level.SEVERE, null, e);
+		}
+    return null;
+	}
+
+	private void SendMessageToServer(String Message)
+	{
+		try {
+			dataoutputstream.writeUTF(Message);	
+		}catch(IOException e) { 
+			LOG.log(Level.SEVERE, "Client::SendMessageToServer: ", e);
+			QuitConnection(QUIT_TYPE_NULL);}
+		LOG.log(Level.INFO, "SendMessageToServer: '"+Message+"'");
+	}
+
 	// Wysyłanie wiadomości
 	private void SendMessage()
 	{
@@ -357,7 +388,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		{
 			// Obsługa Wskaźników
 			try {
-				ServerData = datainputstream.readLine();	
+				ServerData = datainputstream.readUTF();	
 				LOG.log(Level.INFO, "datainputstream: " + ServerData);
 
 				// Lista użytkowników
@@ -369,10 +400,9 @@ public class Client extends JFrame implements Serializable, Runnable,
 					UpdateInformationLabel();
 					// Dodanie użytkownika						
 					tappanel.UserCanvas.ClearAll();
-					while(Tokenizer.hasMoreTokens())
-					{							
+					while(Tokenizer.hasMoreTokens()) {							
 						tappanel.UserCanvas.AddListItemToMessageObject(Tokenizer.nextToken());							
-					}	
+					}
 
 					messagecanvas.ClearAll();										
 					messagecanvas.AddMessageToMessageObject("Nowy pokój: "+UserRoom, MESSAGE_TYPE_JOIN);		
@@ -392,6 +422,13 @@ public class Client extends JFrame implements Serializable, Runnable,
 					{							
 						tappanel.RoomCanvas.AddListItemToMessageObject(Tokenizer.nextToken());							
 					}
+					
+					hist = new History(HistoryFile);
+					historyFrame = new HistoryFrame(hist);
+					historyFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+					historyFrame.setVisible(false);
+					EnableAll();
+					dialog.dispose();
 				}
 
 				// Dodanie do pokoju
@@ -413,9 +450,14 @@ public class Client extends JFrame implements Serializable, Runnable,
 				{						
 					messagecanvas.AddMessageToMessageObject(" Nazwa użytkownika jest już zajęta.",MESSAGE_TYPE_ADMIN);
 					LOG.log(Level.INFO, "Nazwa użytkownika jest już zajęta.");
-					thread = null;
-					QuitConnection(QUIT_TYPE_NULL);
-				}					 
+				}	
+				
+				// Użytkownik istnieje
+				if (ServerData.startsWith("UNRE"))
+				{						
+					messagecanvas.AddMessageToMessageObject(" Użytkownik nie jest zarejestrowany",MESSAGE_TYPE_ADMIN);
+					LOG.log(Level.INFO, "Użytkownik nie jest zarejestrowany.");
+				}
 
 				// Usunięcie
 				if (ServerData.startsWith("REMO"))
@@ -562,7 +604,26 @@ public class Client extends JFrame implements Serializable, Runnable,
 					else
 						messagecanvas.AddMessageToMessageObject("Odrzucono prośbę o odebranie pliku od" 
 										+ sender, MESSAGE_TYPE_ADMIN);
-				}				
+				}		
+				
+				// Rejestracja
+				if(ServerData.startsWith("REGO"))
+				{
+					String answer = ServerData.substring(5);
+					LOG.log(Level.INFO, "REGO: answer = " + answer);
+					
+					if(answer.equals("EXIST")) {
+						dialog.setRegisterLabel("Użytkownik istnieje", Color.RED);
+					}
+					else if(answer.equals("OK")) {
+						dialog.setRegisterLabel("Zarejestrowano!", Color.GREEN);
+						messagecanvas.AddMessageToMessageObject("Zarejestrowano", MESSAGE_TYPE_ADMIN);
+					}
+					else {
+						dialog.setRegisterLabel("Błąd rejestracji", Color.RED);
+					}
+					
+				}		
 
 				// Prywatne wiadomości
 				if( ServerData.startsWith("PRIV"))

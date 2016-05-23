@@ -1,5 +1,6 @@
 package Server;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -8,6 +9,8 @@ import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import java.sql.*;
+import java.text.SimpleDateFormat;
 
 public class Server extends JFrame implements Serializable, ActionListener, Runnable, CommonSettings
 {
@@ -17,8 +20,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	ServerSocket server;
 	Socket socket;
 	Thread thread;    
-	ArrayList userarraylist, messagearraylist;
-	  /** File Sharing List **/
+	ArrayList<ClientObject> userarraylist;
+	ArrayList messagearraylist;
 	public Vector clientFileSharingUsername;
 	public Vector clientFileSharingSocket;
 	ChatCommunication chatcommunication;	
@@ -32,6 +35,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	JRadioButtonMenuItem logOff, logSevere, logWarning, logInfo;
 	JMenuItem settingitem, quititem; 
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); 
+	Connection conn;
 	
 	public Server () 
 	{				
@@ -144,11 +148,25 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				LOG.log(Level.SEVERE, "Server::actionPerformed: ", e);
 			}
 
-			// Inicjalizacja listy
+			// Inicjalizacja list
 			userarraylist = new ArrayList();
 			messagearraylist = new ArrayList();
 			clientFileSharingUsername = new Vector();
 			clientFileSharingSocket = new Vector();
+			
+			//Inicjalizacja Bazy Danych
+			try {
+				Class.forName("com.mysql.jdbc.Driver");
+			} catch (ClassNotFoundException ex) {
+				LOG.log(Level.WARNING, null, ex);
+			}
+			String url = "jdbc:mysql://localhost:3306/userdatabase";
+			try {
+				conn = DriverManager.getConnection(url, "root", "56321");
+			} catch (SQLException ex) {
+				LOG.log(Level.SEVERE, "Inicjalizacja Bazy Danych", ex);
+				ExitServer();
+			}
 
 			// Inicjalizacja wątku
 			thread = new Thread(this);
@@ -214,14 +232,14 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	{
 		try {
 			dataoutputstream = new DataOutputStream(clientsocket.getOutputStream());			
-			dataoutputstream.write((message+"\r\n").getBytes());
+			dataoutputstream.writeUTF(message);
 			LOG.log(Level.INFO, "SendMessageToClient: "+ message);
 		} catch(IOException e) {
 			LOG.log(Level.WARNING, "Server::SendMessageToClient: ", e);
 		}
 	}
 
-	// Objekt - nazwa użytkowanika
+	// Obiekt - nazwa użytkowanika
 	private ClientObject GetClientObject(String UserName)
 	{
 		ClientObject returnClientObject = null;
@@ -240,7 +258,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Sprawdzanie czy użytkownik istnieje
-	private boolean IsUserExists(String UserName) {		
+	private boolean IsUserExists(String UserName) {	
 		return GetClientObject(UserName) != null;	
 	}
 
@@ -258,11 +276,30 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Dodanie użytkownika do listy serwera
-	protected void AddUser(Socket ClientSocket,String UserName)
+	protected void AddUser(Socket ClientSocket,String UserName, String hash)
 	{
+		int count = 0;
+		try {
+			final String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
+			final PreparedStatement ps = conn.prepareStatement(queryCheck);
+			ps.setString(1, hash);
+			final ResultSet resultSet = ps.executeQuery();
+			if(resultSet.next()) {
+				count = resultSet.getInt(1);
+			}
+			
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, null, e);
+		}
+		
+		LOG.log(Level.INFO, "Liczba zarejestrowanych: {0}", Integer.toString(count));
+		if (count == 0) {
+			SendMessageToClient(ClientSocket,"UNRE");
+			return;
+		}
+		
 		// Jeśli istnieje, koniec
-		if(IsUserExists(UserName))
-		{
+		if(IsUserExists(UserName)) {
 			SendMessageToClient(ClientSocket,"EXIS");
 			return;	
 		}
@@ -277,7 +314,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
 		{
 			clientobject = (ClientObject) userarraylist.get(G_ILoop);				
-			// Sprawdzenie nazwy pokojów
+			// Sprawdzenie nazwy pokoi
 			if(clientobject.getRoomName().equals(ROOM_NAME))
 			{
 				SendMessageToClient(clientobject.getSocket(),m_addRFC);
@@ -286,10 +323,10 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			}
 		}
 
-		// Dodaj użytkownika do listy użytkowników
-		clientobject = new ClientObject(ClientSocket,UserName,ROOM_NAME);
+		// Dodaj użytkownika do listy
+		clientobject = new ClientObject(ClientSocket, conn, UserName,ROOM_NAME);
 		userarraylist.add(clientobject);
-
+		
 		// Wysyłanie listy użytkowników
 		stringbuffer.append(UserName);
 		stringbuffer.append(";");
@@ -317,7 +354,14 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				clientobject = 	(ClientObject) userarraylist.get(G_ILoop);
 				if(clientobject.getRoomName().equals(RoomName))
 					SendMessageToClient(clientobject.getSocket(),m_RemoveRFC);
-			}			
+			}		
+			
+		// Usuń użytkownika z bazy danych
+		try {
+			removeclientobject.delete();
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, null, e);
+		}
 		}			
 	}
 
@@ -336,8 +380,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				userarraylist.remove(removeclientobject);	
 				userarraylist.trimToSize();					
 				m_userListSize = userarraylist.size();
+				
 				String m_RemoveRFC="REMO "+m_RemoveUserName;
-
 				// Wyślij informacje o usunięciu do wszystkich
 				for(int m_ILoop = 0; m_ILoop < m_userListSize; m_ILoop++)
 				{
@@ -345,6 +389,14 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 					if(clientobject.getRoomName().equals(m_RemoveRoomName))
 						SendMessageToClient(clientobject.getSocket(),m_RemoveRFC);
 				}
+				
+				// Usuń użytkownika z bazy danych
+				try {
+					removeclientobject.delete();
+				} catch (SQLException e) {
+					LOG.log(Level.WARNING, null, e);
+				}
+		
 				return;	
 			}	
 		}
@@ -353,6 +405,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	// Zmiana pokoju
 	public void ChangeRoom(Socket ClientSocket,String UserName, String NewRoomName)
 	{
+		//TempClientObject.update(conn);
 		int m_clientIndex = GetIndexOf(UserName);		
 		if(m_clientIndex >= 0)
 		{
@@ -360,8 +413,17 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			ClientObject TempClientObject = (ClientObject) userarraylist.get(m_clientIndex);
 			String m_oldRoomName = TempClientObject.getRoomName();
 			TempClientObject.setRoomName(NewRoomName);
+			
 			userarraylist.set(m_clientIndex,TempClientObject);
 			SendMessageToClient(ClientSocket,"CHRO "+NewRoomName);
+			
+			//aktualizuj bazę danych
+			/*try {
+				TempClientObject.update(conn);
+				TempClientObject.pull(conn);
+			} catch (SQLException e) {
+				LOG.log(Level.WARNING, null, e);
+			}*/
 
 			// Wyślij listę użytkowników w pokoju
 			int m_userListSize = userarraylist.size();
@@ -377,7 +439,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				}
 			}
 			SendMessageToClient(ClientSocket,stringbuffer.toString());
-
 
 			// Wiadomośc o starym i nowym pokoju do użytkowników			
 			String m_OldRoomRFC = "LERO "+UserName+"~"+NewRoomName;
@@ -403,7 +464,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			messagearraylist.remove(0);
 			messagearraylist.trimToSize();
 
-			// Sprawdzaj czy użytkownik zatyka serwer
+			// Sprawdzaj czy użytkownik przeciąża serwer
 			String m_firstMessage = (String) messagearraylist.get(0);
 			int m_messageListSize = messagearraylist.size();			
 			for(G_ILoop = 1; G_ILoop < 	m_messageListSize; G_ILoop++)
@@ -483,39 +544,74 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				SendMessageToClient(clientobject.getSocket(),"REIP "+ FromUserName +"~"+
 					ClientSocket.getInetAddress().getHostAddress());			
 			}
-
 	}
 
 	// Wysyłanie adresu użytkownika
 	protected void SendRemoteUserAddress(Socket ClientSocket, String ToUserName, 
 		String FromUserName)
 	{
-			clientobject = GetClientObject(FromUserName);		
-			if(clientobject != null)
-			{			
-					SendMessageToClient(clientobject.getSocket(),"AEIP "+ ToUserName +"~"+
-						ClientSocket.getInetAddress().getHostAddress());						
-			}			
+		clientobject = GetClientObject(FromUserName);		
+		if(clientobject != null)
+		{			
+			SendMessageToClient(clientobject.getSocket(),"AEIP "+ ToUserName +"~"+
+				ClientSocket.getInetAddress().getHostAddress());						
+		}
 	}
 
 	// Licznik użytkowników
 	protected void GetUserCount(Socket ClientSocket, String RoomName)
 	{
-		LOG.log(Level.INFO, "RoomName " + RoomName);
+		LOG.log(Level.INFO, "RoomName {0}", RoomName);
 		int m_userListSize = userarraylist.size();
-		LOG.log(Level.INFO, "m_userListSize = " + m_userListSize);
+		LOG.log(Level.INFO, "m_userListSize = {0}", m_userListSize);
 		int m_userCount = 0;
 
 		for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
 		{
 			clientobject = (ClientObject) userarraylist.get(G_ILoop);
-			LOG.log(Level.INFO, "RoomName " + RoomName);
-			LOG.log(Level.INFO, "clientobject.getRoomName() " + clientobject.getRoomName());
+			LOG.log(Level.INFO, "RoomName {0}", RoomName);
+			LOG.log(Level.INFO, "clientobject.getRoomName() {0}", clientobject.getRoomName());
 			if(clientobject.getRoomName().equals(RoomName))
 				m_userCount++;
 		}
-
 		SendMessageToClient(ClientSocket,"ROCO "+RoomName+"~"+m_userCount);
+	}
+		
+	protected void RegisterRequest(Socket ClientSocket, String hash)
+	{
+		LOG.log(Level.INFO, "hash to register: {0}", hash);
+		int count = 0;
+		try {
+			String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
+			PreparedStatement ps = conn.prepareStatement(queryCheck);
+			ps.setString(1, hash);
+			System.out.println(ps);
+			ResultSet resultSet = ps.executeQuery();
+			if(resultSet.next()) {
+				count = resultSet.getInt(1);
+				LOG.log(Level.INFO, "Liczba zarejestrowanych: {0}", count);
+			}
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, null, e);
+		}
+		
+		if (count != 0) {
+			LOG.log(Level.INFO, "Użytkownik jest już zarejestrowany");
+			SendMessageToClient(ClientSocket,"REGO " + "EXIST");
+			return;
+		}
+		
+		try {
+			String sql = "insert into registered (hash) "
+				+ "values (?)";
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString (1, hash);
+			st.execute();
+			SendMessageToClient(ClientSocket,"REGO " + "OK");
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, null, e);
+			SendMessageToClient(ClientSocket,"REGO " + "OTHER ERROR");
+		}
 	}
 
 	// Zamykanie serwera, niszczenie wszystkiego
@@ -540,28 +636,44 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 
 		userarraylist = null;
 		messagearraylist = null;
+		
+		//usuwam listę zalogowanych
+		try {
+			Statement st = conn.createStatement();
+			String sql = "Truncate table logged";
+			st.executeUpdate(sql);
+		} catch (SQLException | NullPointerException e) {
+			LOG.log(Level.SEVERE, "Czyszczenie tablicy logged", e);
+		}
+		
+		//zamykanie bazy danych
+		try {
+			conn.close();
+		} catch (SQLException | NullPointerException e) {
+			LOG.log(Level.SEVERE, null, e);
+		}
+		
 		cmdStop.setEnabled(false);
 		cmdStart.setEnabled(true);
+		
 	}
 
 	// Plik z ustawieniami
 	private Properties GetDBProperties()
 	{
 		// Wczytywanie ustawień
-		Properties DBProperties = new Properties();	
+		Properties dbprop = new Properties();	
 		try
-		{			
-			InputStream	inputstream = this.getClass().getClassLoader().
-			getResourceAsStream("server.properties");
-			DBProperties.load(inputstream);
-			inputstream.close();
+		(InputStream inputstream = this.getClass().getClassLoader().
+			getResourceAsStream("server.properties")) {
+			dbprop.load(inputstream);
 		}
 		catch (IOException e){
 			LOG.log(Level.SEVERE, "Server::GetDBProperties: ", e);
 		}
 		finally
 		{
-			return (DBProperties);
+			return (dbprop);
 		}
 	}
 }

@@ -19,25 +19,24 @@ import java.util.logging.Logger;
 
 public class History 
 {
-	private static final Logger LOG = Logger.getLogger( History.class.getName() );
+	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 	public String filePath;
 	
-	public History(String filePath)
-	{
-		
+	public History(String filePath) {
 		this.filePath = filePath;
 	}
 	
 	//Dodanie elementu do pliku historii
 	public void addMessage(String UserName, String TextMessage, String UserRoom, String Time)
 	{
+		LOG.log(Level.INFO, TextMessage);
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			Document doc = docBuilder.parse(filePath);
 			
 			Node data = doc.getFirstChild();
-			
+
 			Element message = doc.createElement("message");
 			Element _sender = doc.createElement("sender"); _sender.setTextContent(UserName);
 			Element _content = doc.createElement("content"); _content.setTextContent(TextMessage);

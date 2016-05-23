@@ -39,12 +39,17 @@ public class ChatCommunication implements Runnable,CommonSettings
 		while(thread != null)
 		{
 			try {				
-				RFC = inputstream.readLine();
+				RFC = inputstream.readUTF();
 				LOG.log(Level.INFO, "RFC: " + RFC);
-				// Obsługa tokenów
+				// Obsługa wskaźników
+				if(RFC.startsWith("REGI")){
+					LOG.log(Level.INFO, "REGI");
+					Parent.RegisterRequest(socket, RFC.substring(5));
+				}
+
 				if(RFC.startsWith("HELO")) {	
 					LOG.log(Level.INFO, "HELO");
-					Parent.AddUser(socket,RFC.substring(5));														
+					Parent.AddUser(socket,RFC.substring(5, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));														
 				}
 
 				if(RFC.startsWith("QUIT")) {
@@ -91,6 +96,7 @@ public class ChatCommunication implements Runnable,CommonSettings
 					Parent.SendFileResponse(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
 				}
+				
 
 			} catch(Exception e) { 
 					LOG.log(Level.SEVERE, "ChatCommunication::run: ", e);
