@@ -2,22 +2,22 @@
 ## Wielowątkowy serwer chatu ##
 ### 1. Okienka ###
 * *Okno chatu (15.03.2016)*
-* Okno rejestracji
+* *Okno rejestracji (17.05.2016)*
 * *Okno logowania (15.03.2016)*
 * *Okno historii (19.04.2016)*
 ### 2. Zapis i odczyt plików ###
 * *Zapis historii rozmowy Odczyt historii rozmowy (19.04.2016)*
 * *Zapis i odczyt konfiguracji klienta i serwera (12.04.2016)*
-* Zapis logów serwera
+* *Zapis logów serwera (17.05.2016)*
 ### 3. Współbieżność ###
 * *Wielowątkowość prosta (1 klient – 1 wątek), wątek nasłuchujący (8.03.2016)*
 * Ograniczenie masowej wielowątkowości przy wielu użytkownikach (nIO)
 * Mechanizm wrzucania wiadomości do skrzynek użytkowników
 * Mechanizm przechowywania rozmowy
 ### 4. Bazy danych ###
-* Baza danych użytkowników (JDBC, CRUD)
-* Logowanie i rejestracja (logika leżąca po stronie serwera) sprawdzanie listy zalogowanych użytkowników
-* Przetwarzanie nowych konwersacji
+* *Baza danych użytkowników (JDBC, CRUD) (24.05.2016)*
+* *Logowanie i rejestracja (logika leżąca po stronie serwera) sprawdzanie listy zalogowanych użytkowników (24.05.2016)*
+* *Przetwarzanie nowych konwersacji (24.05.2016)*
 ### 5. Komunikacja sieciowa ###
 * *Klasa serwer: nasłuchiwanie i akceptowanie połączenia (1.03.2016)*
 * *Klasa klient: obsługa zdarzeń (8.03.2016)*
