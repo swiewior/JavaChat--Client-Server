@@ -3,7 +3,6 @@ package gui;
 import client.Client;
 import client.CommonSettings;
 import client.MessageObject;
-import gui.ScrollView;
 import java.awt.*;
 import java.util.*;
 
@@ -99,7 +98,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
 		
 		scrollview.setScrollPos(2,2);					
 		scrollview.setScrollSteps(2, 1, DEFAULT_SCROLLING_HEIGHT);
-		repaint();		
+		//repaint();
 	}
 
 	private void PaintFrame(Graphics graphics)
@@ -172,6 +171,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
 				graphics.setColor(Color.gray);
 				break;	
 			}	
+			
 		}			
 		
 		graphics.drawString(Message,m_XPos+CustomWidth,m_YPos);

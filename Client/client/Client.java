@@ -102,12 +102,12 @@ public class Client extends JFrame implements Serializable, Runnable,
 		logOff = new JRadioButtonMenuItem("Wyłączone");
 		logmenu.add(logOff);
 		logOff.addActionListener(this);
-		logOff.setSelected(true);
 		group.add(logOff);
 		
 		logSevere = new JRadioButtonMenuItem("Krytyczne");
 		logmenu.add(logSevere);
 		logSevere.addActionListener(this);
+		logSevere.setSelected(true);
 		group.add(logSevere);
 		
 		logWarning = new JRadioButtonMenuItem("Ostrzeżenia");
@@ -286,8 +286,15 @@ public class Client extends JFrame implements Serializable, Runnable,
 			dialog.setConnectLabel("Połączono!", Color.GREEN);
 			
 		} catch (IOException e) {
-			LOG.log(Level.SEVERE, "Połączenie nieudane", e);
-			dialog.setConnectLabel("Połączenie nieudane!", Color.RED);
+			try {
+				LOG.log(Level.SEVERE, "Połączenie nieudane", e);
+				dialog.setConnectLabel("Połączenie nieudane!", Color.RED);
+				dataoutputstream.close();
+				datainputstream.close();
+				socket.close();
+			} catch (IOException e2) {
+				LOG.log(Level.SEVERE, "Błąd zamykania socketa i strumieni", e2);
+			}
 		}
 	}
 	
@@ -341,6 +348,10 @@ public class Client extends JFrame implements Serializable, Runnable,
 		}catch(IOException e) { 
 			LOG.log(Level.SEVERE, "Client::SendMessageToServer: ", e);
 			QuitConnection(QUIT_TYPE_NULL);}
+		catch(NullPointerException e2){
+			LOG.log(Level.SEVERE, "Client::SendMessageToServer: ", e2);
+			dialog.setRegisterLabel("Sprawdź połączenie", Color.RED);
+		}
 		LOG.log(Level.INFO, "SendMessageToServer: '"+Message+"'");
 	}
 
@@ -802,9 +813,17 @@ public class Client extends JFrame implements Serializable, Runnable,
 				thread.stop();
 				thread = null;
 		}		
+		
+		//zamykanie logu
+		try {
+			ClientLogger.close();
+		} catch (SecurityException e) {
+			LOG.log(Level.SEVERE, null, e);
+		}
+		
 		DisableAll();
 		StartFlag = false;
-		SetAppletStatus("Połączenie z serwerem zakończone.");					
+		SetAppletStatus("Połączenie z serwerem zakończone.");		
 	}
 
 	// Wyłączenie chatu

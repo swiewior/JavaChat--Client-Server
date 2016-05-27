@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import java.net.Socket;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class ChatCommunication implements Runnable,CommonSettings
 					LOG.log(Level.INFO, "KICK");
 					QuitConnection();
 				}
-
+				
 				if(RFC.startsWith("CHRO")) {
 					Parent.ChangeRoom(socket,RFC.substring(5,RFC.indexOf("~")),RFC.substring(RFC.indexOf("~")+1));	
 					LOG.log(Level.INFO, "CHRO");

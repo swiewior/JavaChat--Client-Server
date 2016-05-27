@@ -16,12 +16,16 @@ public class ClientLogger
 		// get the global logger to configure it
 		Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-		LOG.setLevel(Level.OFF);
+		LOG.setLevel(Level.SEVERE);
 		fileTxt = new FileHandler("Client.log");
 
 		// create a TXT formatter
 		LOG.addHandler(fileTxt);
 		formatterTxt = new SimpleFormatter();
 		fileTxt.setFormatter(formatterTxt);
+	}
+	
+	static public void close() throws SecurityException {
+		fileTxt.close();
 	}
 }

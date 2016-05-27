@@ -1,5 +1,5 @@
-import Server.Server;
-import Server.ServerLogger;
+import server.Server;
+import server.ServerLogger;
 import java.io.IOException;
 
 public class main 

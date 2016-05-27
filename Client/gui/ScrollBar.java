@@ -1,8 +1,6 @@
 package gui;
 
-import client.ClientLogger;
 import java.awt.*;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

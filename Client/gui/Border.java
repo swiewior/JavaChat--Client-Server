@@ -96,11 +96,9 @@ public class Border extends Canvas implements CommonSettings
 		if(mode == 4)
 		{
 			DrawBottom(g);
-			return;
 		} else
 		{
 			DrawHorizontal(g);
-			return;
 		}
 	}
 
@@ -179,18 +177,21 @@ public class Border extends Canvas implements CommonSettings
 		g.drawLine(bsize + 3, 0, bsize + 3, i);
 	}
 	
+	@Override
 	public boolean 	mouseEnter(Event event, int i, int j)
 	{
 			setCursor(new Cursor(Cursor.HAND_CURSOR));
 			return true;
 	}
 
+	@Override
 	public boolean 	mouseExit(Event event, int i, int j)
 	{
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); 
 			return true;
 	}
 	
+	@Override
 	public boolean mouseDown(Event event, int i, int j)
 	{
 		if(mode != 1)
@@ -205,6 +206,7 @@ public class Border extends Canvas implements CommonSettings
 		return true;
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		return minimumSize();
 	}
@@ -252,7 +254,8 @@ public class Border extends Canvas implements CommonSettings
 		}
 
 		Rectangle rectangle = (Rectangle)parent.tabPos.elementAt(parent.curTab);
-		DrawTab(g, rectangle.x, rectangle.y - 4, rectangle.width + 2, rectangle.height + 5, true, (String)parent.tabNames.elementAt(parent.curTab));
+		DrawTab(g, rectangle.x, rectangle.y - 4, rectangle.width + 2, 
+			rectangle.height + 5, true, (String)parent.tabNames.elementAt(parent.curTab));
 	}
 
 	public void DrawHorizontal(Graphics g)

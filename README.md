@@ -13,7 +13,7 @@
 * *Wielowątkowość prosta (1 klient – 1 wątek), wątek nasłuchujący (8.03.2016)*
 * Ograniczenie masowej wielowątkowości przy wielu użytkownikach (nIO)
 * Mechanizm wrzucania wiadomości do skrzynek użytkowników
-* Mechanizm przechowywania rozmowy
+* *Mechanizm przechowywania rozmowy (31.05.2016)*
 ### 4. Bazy danych ###
 * *Baza danych użytkowników (JDBC, CRUD) (24.05.2016)*
 * *Logowanie i rejestracja (logika leżąca po stronie serwera) sprawdzanie listy zalogowanych użytkowników (24.05.2016)*

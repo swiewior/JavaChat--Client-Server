@@ -21,6 +21,7 @@ public class InformationDialog extends JDialog implements ActionListener
 	Properties properties;
 	public JTabbedPane tabPanel;
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
+	InputStream fin;
 		
 	InformationDialog(Client Parent)
 	{
@@ -30,17 +31,16 @@ public class InformationDialog extends JDialog implements ActionListener
 		setLayout(new BorderLayout());
 		IsConnect = false;
 		IsRegister = false;
-
+		fin = null;
 		properties=new Properties();
 		
-		File f = new File("client.properties");
-		if(f.exists() && !f.isDirectory()) { 
-			try {
-				properties.load(this.getClass().getClassLoader().
-					getResourceAsStream("client.properties"));		
-			} catch(java.io.IOException | java.lang.NullPointerException e) {
-				LOG.log(Level.WARNING, "InformationDialog::InformationDialog: ", e);
-			}
+		try {
+			fin = new FileInputStream("client.properties");
+			properties.load(fin);
+		} catch (FileNotFoundException e) {
+			LOG.log(Level.WARNING, "InformationDialog::InformationDialog: ", e);
+		} catch (IOException e) {
+			LOG.log(Level.WARNING, "InformationDialog::InformationDialog: ", e);
 		}
 
 		addWindowListener(new WindowAdapter() {
@@ -137,8 +137,6 @@ public class InformationDialog extends JDialog implements ActionListener
 		LoginPanel.add(CmdSave);
 		
 		tabPanel.add("Logowanie", LoginPanel);
-		
-
 
 		add("Center",tabPanel);
 
@@ -158,11 +156,17 @@ public class InformationDialog extends JDialog implements ActionListener
 		EmptyWestPanel.setBackground(Color.white);
 		add("West",EmptyWestPanel);
 
+		try {
+			fin.close();
+		} catch (IOException | NullPointerException e) {
+			LOG.log(Level.WARNING, null, e);
+		}
 		setSize(350,280);
 		chatclient.show();
 		show();				
 	}	
 	
+	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (evt.getSource().equals(CmdConnect)) {
@@ -186,6 +190,12 @@ public class InformationDialog extends JDialog implements ActionListener
 			properties.setProperty("port",TxtServerPort.getText());
 			properties.setProperty("history",TxtHistoryFile.getText());
 			properties.save(fout,"Client Settings");
+			
+			try {
+				fout.close();
+			} catch (IOException e) {
+				LOG.log(Level.WARNING, "InformationDialog::actionPerformed: ", e);
+			}
 		}	
 	}
 	

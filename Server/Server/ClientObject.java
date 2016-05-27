@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import java.net.Socket;
 import java.sql.Connection;

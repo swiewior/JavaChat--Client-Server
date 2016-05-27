@@ -1,6 +1,5 @@
-package Server;
+package server;
 
-import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -10,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 
 public class Server extends JFrame implements Serializable, ActionListener, Runnable, CommonSettings
 {
@@ -22,12 +20,14 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	Thread thread;    
 	ArrayList<ClientObject> userarraylist;
 	ArrayList messagearraylist;
+	ArrayList<RoomObject> roomArrayList;
 	public Vector clientFileSharingUsername;
 	public Vector clientFileSharingSocket;
 	ChatCommunication chatcommunication;	
 	DataOutputStream dataoutputstream;
 	int G_ILoop, Port;
 	ClientObject clientobject;
+	RoomObject roomobject;
 	String RoomList;
 	protected TextField TxtPort, TxtRooms;
 	Properties properties;
@@ -38,8 +38,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	Connection conn;
 	
 	public Server () 
-	{				
-
+	{
 		//Inicjalizacja
 		this.setTitle("Java Chat Server");
 		this.setResizable(false);
@@ -86,12 +85,12 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		logOff = new JRadioButtonMenuItem("Wyłączone");
 		logmenu.add(logOff);
 		logOff.addActionListener(this);
-		logOff.setSelected(true);
 		group.add(logOff);
 		
 		logSevere = new JRadioButtonMenuItem("Krytyczne");
 		logmenu.add(logSevere);
 		logSevere.addActionListener(this);
+		logSevere.setSelected(true);
 		group.add(logSevere);
 		
 		logWarning = new JRadioButtonMenuItem("Ostrzeżenia");
@@ -151,6 +150,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			// Inicjalizacja list
 			userarraylist = new ArrayList();
 			messagearraylist = new ArrayList();
+			roomArrayList = new ArrayList();
 			clientFileSharingUsername = new Vector();
 			clientFileSharingSocket = new Vector();
 			
@@ -166,7 +166,20 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			} catch (SQLException ex) {
 				LOG.log(Level.SEVERE, "Inicjalizacja Bazy Danych", ex);
 				ExitServer();
+				return;
 			}
+			
+			//Tworzenie roomArrayList
+			String[] rooms = RoomList.split(";");
+			System.out.println("Tworzenie roomArrayList");
+			for (G_ILoop = 0; G_ILoop < rooms.length; G_ILoop++)
+			{
+				System.out.print(G_ILoop + ": " + rooms[G_ILoop] + "\n");
+				roomobject = new RoomObject(rooms[G_ILoop]);
+				roomArrayList.add(roomobject);
+			}
+			System.out.print("\n");
+				
 
 			// Inicjalizacja wątku
 			thread = new Thread(this);
@@ -179,9 +192,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		if(evt.getActionCommand().equalsIgnoreCase("Stop Server"))
 		{
 			LOG.log(Level.INFO, "Stop Server");
-			ExitServer();
-			cmdStop.setEnabled(false);
-			cmdStart.setEnabled(true);	
+			ExitServer();	
 		}		
 		
 		if(evt.getSource().equals(settingitem))	
@@ -201,6 +212,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			LOG.setLevel(Level.WARNING);
 		if(evt.getSource().equals(logInfo))
 			LOG.setLevel(Level.ALL);
+		
+		
 	}    
 	
 	// Implementacja wątku
@@ -228,7 +241,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Wysyłanie wiadomości do klienta
-	private void SendMessageToClient(Socket clientsocket,String message)
+	private synchronized void SendMessageToClient(Socket clientsocket,String message)
 	{
 		try {
 			dataoutputstream = new DataOutputStream(clientsocket.getOutputStream());			
@@ -276,7 +289,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Dodanie użytkownika do listy serwera
-	protected void AddUser(Socket ClientSocket,String UserName, String hash)
+	protected synchronized void AddUser(Socket ClientSocket,String UserName, String hash)
 	{
 		int count = 0;
 		try {
@@ -322,7 +335,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				stringbuffer.append(";");									
 			}
 		}
-
+	
 		// Dodaj użytkownika do listy
 		clientobject = new ClientObject(ClientSocket, conn, UserName,ROOM_NAME);
 		userarraylist.add(clientobject);
@@ -330,12 +343,32 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		// Wysyłanie listy użytkowników
 		stringbuffer.append(UserName);
 		stringbuffer.append(";");
-		SendMessageToClient(ClientSocket,stringbuffer.toString());	
+		SendMessageToClient(ClientSocket,stringbuffer.toString());
+		
+		// Wysyłąnie listy ostatnich wiadomości
+		String[] messages;
+		int m_roomListSize = roomArrayList.size();
+		for(G_ILoop = 0; G_ILoop < m_roomListSize; G_ILoop++)
+		{
+			System.out.print(G_ILoop + " ");
+			roomobject = (RoomObject) roomArrayList.get(G_ILoop);
+			if(roomobject.getRoomName().equals(ROOM_NAME))
+			{
+				messages = roomobject.getMessageList().toString().split("\\r?\\n");
+				for (G_ILoop = 0; G_ILoop < messages.length; G_ILoop++)
+				{
+					LOG.log(Level.INFO, "Ostatnia wiad: {0}", messages[G_ILoop]);
+					SendMessageToClient(ClientSocket, messages[G_ILoop]);
+				}
+				return;
+			}			
+		}
+		System.out.print("\n");
 
 	}
 
 	// Usuń użytkownika z serwera
-	public void RemoveUser(String UserName, String RoomName, int RemoveType)
+	public synchronized void RemoveUser(String UserName, String RoomName, int RemoveType)
 	{
 		ClientObject removeclientobject = GetClientObject(UserName);
 		if(removeclientobject != null)
@@ -366,7 +399,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Wywal użytkownika gdy wyskoczy exception
-	protected void RemoveUserWhenException(Socket clientsocket)
+	protected synchronized void RemoveUserWhenException(Socket clientsocket)
 	{
 		int m_userListSize = userarraylist.size();
 		ClientObject removeclientobject;
@@ -416,14 +449,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			
 			userarraylist.set(m_clientIndex,TempClientObject);
 			SendMessageToClient(ClientSocket,"CHRO "+NewRoomName);
-			
-			//aktualizuj bazę danych
-			/*try {
-				TempClientObject.update(conn);
-				TempClientObject.pull(conn);
-			} catch (SQLException e) {
-				LOG.log(Level.WARNING, null, e);
-			}*/
 
 			// Wyślij listę użytkowników w pokoju
 			int m_userListSize = userarraylist.size();
@@ -448,10 +473,31 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				clientobject = (ClientObject) userarraylist.get(G_ILoop);
 				if(clientobject.getRoomName().equals(m_oldRoomName))
 					SendMessageToClient(clientobject.getSocket(),m_OldRoomRFC);
-				if((clientobject.getRoomName().equals(NewRoomName)) && (!(clientobject.getUserName().equals(UserName))))
+				if((clientobject.getRoomName().equals(NewRoomName)) && 
+					(!(clientobject.getUserName().equals(UserName))) )
 					SendMessageToClient(clientobject.getSocket(),m_NewRoomRFC);
 			} 			
 		}
+		
+		// Wysyłąnie listy ostatnich wiadomości
+		String[] messages;
+		int m_roomListSize = roomArrayList.size();
+		for(G_ILoop = 0; G_ILoop < m_roomListSize; G_ILoop++)
+		{
+			System.out.print(G_ILoop + " ");
+			roomobject = (RoomObject) roomArrayList.get(G_ILoop);
+			if(roomobject.getRoomName().equals(NewRoomName))
+			{
+				messages = roomobject.getMessageList().toString().split("\\r?\\n");
+				for (G_ILoop = 0; G_ILoop < messages.length; G_ILoop++)
+				{
+					LOG.log(Level.INFO, "Ostatnia wiad: {0}", messages[G_ILoop]);
+					SendMessageToClient(ClientSocket, messages[G_ILoop]);
+				}
+				return;
+			}			
+		}
+		System.out.print("\n");
 	}
 
 	// Wyślij Główną wiadomość
@@ -490,6 +536,20 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			{				
 				SendMessageToClient(clientobject.getSocket(),m_messageRFC);	
 			}	
+		}
+		
+		// Umieszczanie wiadomości w kolejce messageList
+		int m_roomListSize = roomArrayList.size();
+		m_messageRFC = "MESS "+UserName+":"+Message;
+		for(G_ILoop = 0; G_ILoop < m_roomListSize; G_ILoop++)
+		{
+			roomobject = (RoomObject) roomArrayList.get(G_ILoop);
+			if(roomobject.getRoomName().equals(RoomName))
+			{
+				LOG.log(Level.INFO, "Dodaję do kolejki: {0}", m_messageRFC);
+				roomobject.getMessageList().enqueue(m_messageRFC);
+				return;
+			}				
 		}
 
 		// Wywal spammera
@@ -585,7 +645,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
 			PreparedStatement ps = conn.prepareStatement(queryCheck);
 			ps.setString(1, hash);
-			System.out.println(ps);
+			LOG.log(Level.INFO, ps.toString());
 			ResultSet resultSet = ps.executeQuery();
 			if(resultSet.next()) {
 				count = resultSet.getInt(1);
@@ -650,6 +710,13 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		try {
 			conn.close();
 		} catch (SQLException | NullPointerException e) {
+			LOG.log(Level.SEVERE, null, e);
+		}
+		
+		//zamykanie logu
+		try {
+			ServerLogger.close();
+		} catch (SecurityException e) {
 			LOG.log(Level.SEVERE, null, e);
 		}
 		

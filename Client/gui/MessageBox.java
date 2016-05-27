@@ -80,4 +80,4 @@ public class MessageBox extends JDialog implements ActionListener,CommonSettings
 			dispose();
 	}
 
- }
+}
