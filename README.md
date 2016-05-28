@@ -12,7 +12,7 @@
 ### 3. Współbieżność ###
 * *Wielowątkowość prosta (1 klient – 1 wątek), wątek nasłuchujący (8.03.2016)*
 * Ograniczenie masowej wielowątkowości przy wielu użytkownikach (nIO)
-* Mechanizm wrzucania wiadomości do skrzynek użytkowników
+* *Mechanizm wrzucania wiadomości do skrzynek użytkowników (31.05.2016)*
 * *Mechanizm przechowywania rozmowy (31.05.2016)*
 ### 4. Bazy danych ###
 * *Baza danych użytkowników (JDBC, CRUD) (24.05.2016)*
@@ -21,7 +21,7 @@
 ### 5. Komunikacja sieciowa ###
 * *Klasa serwer: nasłuchiwanie i akceptowanie połączenia (1.03.2016)*
 * *Klasa klient: obsługa zdarzeń (8.03.2016)*
-* *Obsługa plików (10.05.2016)*
+* Obsługa plików
 * *Odczytanie wiadomości, wysłanie odpowiedzi (po stronie serwera i klienta), zorganizowanie protokołu komunikacji (1.03.2016)*
 ### 6. Zaproponowane przez studenta ###
 * *Pokoje rozmów (5.04.2016)*

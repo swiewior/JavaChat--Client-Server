@@ -2,26 +2,22 @@ package client;
 
 import filetransfer.Download;
 import filetransfer.Upload;
+import gui.HistoryFrame;
 import gui.MessageBox;
 import gui.MessageCanvas;
 import gui.ScrollView;
-import gui.HistoryFrame;
-
 import java.awt.*;
 import java.awt.event.*;
-import java.util.StringTokenizer;
 import java.io.*;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import javax.swing.JButton;
-import javax.swing.table.DefaultTableModel;
 import java.util.Date;
-import javax.swing.*;
-
-import java.util.logging.Logger;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import javax.swing.ButtonGroup;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class Client extends JFrame implements Serializable, Runnable, 
 				KeyListener, ActionListener, CommonSettings 
@@ -29,7 +25,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 	// Zmienne globalne
 	String UserName,UserRoom,ServerName,AppletStatus,ChatLogo,BannerName,
 					ServerData,RoomList,SplitString, Password;
-	int ServerPort,IconCount,TotalUserCount,G_ILoop;
+	int ServerPort,IconCount,TotalUserCount, TotalRegisterCount, G_ILoop;
 	boolean StartFlag;	
 	Socket socket;
 	DataInputStream datainputstream;
@@ -309,7 +305,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 		Password 	= dialog.txtRegisterPassword.getText();
 
 		String hash = MD5(UserName+Password);
-		SendMessageToServer("REGI " + hash);
+		SendMessageToServer("REGI " + UserName + ":" + hash);
 	}
 	
 	public void Login(InformationDialog d)
@@ -411,12 +407,25 @@ public class Client extends JFrame implements Serializable, Runnable,
 					UpdateInformationLabel();
 					// Dodanie użytkownika						
 					tappanel.UserCanvas.ClearAll();
-					while(Tokenizer.hasMoreTokens()) {							
-						tappanel.UserCanvas.AddListItemToMessageObject(Tokenizer.nextToken());							
-					}
+					while(Tokenizer.hasMoreTokens())
+					{
+						String T = Tokenizer.nextToken();
+						tappanel.UserCanvas.AddListItemToMessageObject(T);
+					}				
 
 					messagecanvas.ClearAll();										
 					messagecanvas.AddMessageToMessageObject("Nowy pokój: "+UserRoom, MESSAGE_TYPE_JOIN);		
+				}
+				
+				if(ServerData.startsWith("REGL"))
+				{
+					Tokenizer = new StringTokenizer(ServerData.substring(5),";");						
+					// Aktualizacja nagłówka informacyjnego
+					TotalRegisterCount = Tokenizer.countTokens();
+					// Dodanie użytkownika						
+					tappanel.RegisterCanvas.ClearAll();
+					while(Tokenizer.hasMoreTokens())
+						tappanel.RegisterCanvas.AddListItemToMessageObject(Tokenizer.nextToken());
 				}
 
 				// Aktualizacja listy pokoi
@@ -452,7 +461,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 					// Dodanie do listy użytkowników
 					SplitString = ServerData.substring(5);
 					EnablePrivateWindow(SplitString);
-					tappanel.UserCanvas.AddListItemToMessageObject(SplitString);							
+					tappanel.UserCanvas.AddListItemToMessageObject(SplitString);
 					messagecanvas.AddMessageToMessageObject(SplitString + " dołączył do czatu",MESSAGE_TYPE_JOIN);						
 				}
 
@@ -468,6 +477,12 @@ public class Client extends JFrame implements Serializable, Runnable,
 				{						
 					messagecanvas.AddMessageToMessageObject(" Użytkownik nie jest zarejestrowany",MESSAGE_TYPE_ADMIN);
 					LOG.log(Level.INFO, "Użytkownik nie jest zarejestrowany.");
+				}
+				// Nieprawidłowe hasło przy logowaniu
+				if (ServerData.startsWith("WRPA"))
+				{						
+					messagecanvas.AddMessageToMessageObject(" Nieprawidłowe hasło",MESSAGE_TYPE_ADMIN);
+					LOG.log(Level.INFO, "Nieprawidłowe hasło.");
 				}
 
 				// Usunięcie
@@ -529,8 +544,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 				}
 
 				// Zmiana pokoju
-				if( ServerData.startsWith("CHRO"))
-				{
+				if( ServerData.startsWith("CHRO")) {
 					UserRoom = ServerData.substring(5);	
 				}
 
@@ -633,21 +647,16 @@ public class Client extends JFrame implements Serializable, Runnable,
 					else {
 						dialog.setRegisterLabel("Błąd rejestracji", Color.RED);
 					}
-					
-				}		
+				}
 
 				// Prywatne wiadomości
-				if( ServerData.startsWith("PRIV"))
-				{												
+				if( ServerData.startsWith("PRIV")) {												
 					SplitString = ServerData.substring(5,ServerData.indexOf(":"));
 					// Sprawdź czy ignorowany
-					if(!(tappanel.UserCanvas.IsIgnoredUser(SplitString)))	
-					{
+					if(!(tappanel.UserCanvas.IsIgnoredUser(SplitString))) {
 						boolean PrivateFlag = false;
-						for(G_ILoop = 0; G_ILoop < PrivateWindowCount;G_ILoop++)
-						{								
-							if(privatewindow[G_ILoop].UserName.equals(SplitString))
-							{
+						for(G_ILoop = 0; G_ILoop < PrivateWindowCount;G_ILoop++) {								
+							if(privatewindow[G_ILoop].UserName.equals(SplitString)) {
 								privatewindow[G_ILoop].AddMessageToMessageCanvas(ServerData.substring(5));
 								privatewindow[G_ILoop].show();
 								privatewindow[G_ILoop].requestFocus();
@@ -666,35 +675,29 @@ public class Client extends JFrame implements Serializable, Runnable,
 							}
 						}	
 
-					if(!(PrivateFlag))
-					{	
-						if(PrivateWindowCount >= MAX_PRIVATE_WINDOW)
-						{
-							messagecanvas.AddMessageToMessageObject("Przekraczasz limit prywatnych wiadomości",MESSAGE_TYPE_ADMIN);	
-						}
-						else
-						{														
-							privatewindow[PrivateWindowCount++] = new PrivateChat(this,SplitString);
-							privatewindow[PrivateWindowCount-1].AddMessageToMessageCanvas(ServerData.substring(5));
-							privatewindow[PrivateWindowCount-1].show();
-							privatewindow[PrivateWindowCount-1].requestFocus();	
-								
-							//Zapis do Historii
-							String msgTime = (new Date()).toString();
-							try {
-								hist.addMessage(SplitString, ServerData.substring(ServerData.indexOf(":")+2), UserName, msgTime);							 
-								DefaultTableModel table = (DefaultTableModel) historyFrame.jTable1.getModel();
-								table.addRow(new Object[]{SplitString, ServerData.substring(ServerData.indexOf(":")+2), UserName, msgTime});
-							} catch(Exception e) {
-								LOG.log(Level.WARNING, "Client::run::PRIV:PrivateFlag (History): ", e);
-							}
-							break;			
-						}
-					}
+						if(!(PrivateFlag)) {	
+							if(PrivateWindowCount >= MAX_PRIVATE_WINDOW)
+								messagecanvas.AddMessageToMessageObject("Przekraczasz limit prywatnych wiadomości",MESSAGE_TYPE_ADMIN);	
+							else {														
+								privatewindow[PrivateWindowCount++] = new PrivateChat(this,SplitString);
+								privatewindow[PrivateWindowCount-1].AddMessageToMessageCanvas(ServerData.substring(5));
+								privatewindow[PrivateWindowCount-1].show();
+								privatewindow[PrivateWindowCount-1].requestFocus();	
 
+								//Zapis do Historii
+								String msgTime = (new Date()).toString();
+								try {
+									hist.addMessage(SplitString, ServerData.substring(ServerData.indexOf(":")+2), UserName, msgTime);							 
+									DefaultTableModel table = (DefaultTableModel) historyFrame.jTable1.getModel();
+									table.addRow(new Object[]{SplitString, ServerData.substring(ServerData.indexOf(":")+2), UserName, msgTime});
+								} catch(Exception e) {
+									LOG.log(Level.WARNING, "Client::run::PRIV:PrivateFlag (History): ", e);
+								}	
+							}
+						}
 					}						
 				}
-			}catch(Exception e) { 
+			} catch(Exception e) { 
 				LOG.log(Level.SEVERE, "Client::run: ", e);
 				messagecanvas.AddMessageToMessageObject(e.getMessage(),MESSAGE_TYPE_ADMIN);
 				QuitConnection(QUIT_TYPE_DEFAULT); 
@@ -710,7 +713,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 			if(privatewindow[G_ILoop].UserName.equals(ToUserName))
 			{
 				privatewindow[G_ILoop].messagecanvas.AddMessageToMessageObject(ToUserName + " jest dostępny",MESSAGE_TYPE_ADMIN);	
-				privatewindow[G_ILoop].EnableAll();			
+				//privatewindow[G_ILoop].EnableAll();			
 				return;	
 			}
 		}	
@@ -724,7 +727,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 			if(privatewindow[G_ILoop].UserName.equals(ToUserName))
 			{
 				privatewindow[G_ILoop].messagecanvas.AddMessageToMessageObject(ToUserName + " jest niedostępny",MESSAGE_TYPE_ADMIN);	
-				privatewindow[G_ILoop].DisableAll();			
+				//privatewindow[G_ILoop].DisableAll();			
 				return;	
 			}
 		}	

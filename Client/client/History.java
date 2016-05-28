@@ -2,33 +2,37 @@ package client;
 
 import gui.HistoryFrame;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
-import javax.swing.table.DefaultTableModel;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class History 
 {
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 	public String filePath;
+	boolean fileflag;
 	
 	public History(String filePath) {
 		this.filePath = filePath;
+		fileflag = !(filePath.isEmpty());
 	}
 	
 	//Dodanie elementu do pliku historii
 	public void addMessage(String UserName, String TextMessage, String UserRoom, String Time)
 	{
+		if (!fileflag)
+			return;
+		
 		LOG.log(Level.INFO, TextMessage);
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -63,6 +67,9 @@ public class History
 	
 	// Wypełnianie tablicy z pliku historii na początku programu
 	public void FillTable(HistoryFrame frame){
+		if (!fileflag)
+			return;
+		
 		DefaultTableModel model = (DefaultTableModel) frame.jTable1.getModel();
 	
 		try{
@@ -124,6 +131,9 @@ public class History
 	
 	// Czyszczenie pliku
 	public void ClearFile() {
+		if (!fileflag)
+			return;
+		
 		try (PrintWriter writer = new PrintWriter(filePath)) {
 			writer.print("");
 			writer.close();

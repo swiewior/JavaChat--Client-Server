@@ -15,6 +15,7 @@ public interface CommonSettings
 	public int SCROLL_BAR_SIZE = 15;
 	public int USER_CANVAS = 0;
 	public int ROOM_CANVAS = 1;
+	public int REGISTER_CANVAS = 2;
 	public int DEFAULT_MESSAGE_CANVAS_POSITION = 25;
 	public int DEFAULT_SCROLLING_HEIGHT  = 20;
 

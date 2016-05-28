@@ -98,7 +98,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
 		
 		scrollview.setScrollPos(2,2);					
 		scrollview.setScrollSteps(2, 1, DEFAULT_SCROLLING_HEIGHT);
-		//repaint();
+		repaint();
 	}
 
 	private void PaintFrame(Graphics graphics)
@@ -181,6 +181,7 @@ public class MessageCanvas extends Canvas implements CommonSettings
 		fontmetrics = chatclient.getGraphics().getFontMetrics();				
 	}
 	
+	@Override
 	public boolean handleEvent(Event event)
 	{
 		if(event.id == 1001 && event.arg == scrollview)

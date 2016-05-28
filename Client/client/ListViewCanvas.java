@@ -75,7 +75,6 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 			if(messageobject.Message.equals(Message))		
 			return G_ILoop;		
 		}
-
 		return -1;
 	}
 
@@ -89,13 +88,11 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 			messageobject.IsIgnored = IsIgnore;
 			ListArray.set(m_listIndex,messageobject);
 
-			if(IsIgnore)
-			{
+			if(IsIgnore) {
 				chatclient.tappanel.CmdIgnoreUser.setLabel("Odblokuj");
 				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został zablokowany",MESSAGE_TYPE_LEAVE);	
 			}
-			else
-			{
+			else {
 				chatclient.tappanel.CmdIgnoreUser.setLabel("Ignoruj");
 				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został odblokowany",MESSAGE_TYPE_JOIN);	
 			}
@@ -134,7 +131,6 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 				"Nie możesz rozmawiać ze samym sobą",MESSAGE_TYPE_ADMIN);	
 			return;
 		}	
-
 		CreatePrivateWindow();
 	}
 	
@@ -176,7 +172,6 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 			messageobject = (MessageObject) ListArray.get(m_listIndex);
 			return messageobject.IsIgnored;	
 		}
-
 		// Domyślnie
 		return false;
 
@@ -213,9 +208,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 		{		
 			messageobject = (MessageObject) ListArray.get(G_ILoop);		
 			if((messageobject.StartY + messageobject.Height) >= YOffset)
-			{		
-				PaintListItemIntoCanvas(graphics,messageobject);	
-			}
+				PaintListItemIntoCanvas(graphics,messageobject);
 		}
 	}
 
@@ -223,29 +216,30 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 	private void PaintListItemIntoCanvas(Graphics graphics, 
 		MessageObject messageObject)
 	{
-			int m_StartY = messageObject.StartY - YOffset;
+		int m_StartY = messageObject.StartY - YOffset;
 
-			if(messageobject.Selected == true)
-			{
-					graphics.setColor(Color.blue);
-					graphics.fillRect(5-XOffset+DEFAULT_LIST_CANVAS_HEIGHT,
-						m_StartY,TotalWidth,DEFAULT_LIST_CANVAS_INCREMENT);
-					graphics.setColor(Color.white);	
-					graphics.drawString(messageObject.Message,5-XOffset+
-						DEFAULT_LIST_CANVAS_INCREMENT,m_StartY+DEFAULT_LIST_CANVAS_HEIGHT);	
-			}
-			else
-			{
-					graphics.setColor(Color.white);
-					graphics.fillRect(5-XOffset+DEFAULT_LIST_CANVAS_HEIGHT,
-						m_StartY,TotalWidth,DEFAULT_LIST_CANVAS_INCREMENT);
-					graphics.setColor(Color.black);	
-					graphics.drawString(messageObject.Message,5-XOffset+
-						DEFAULT_LIST_CANVAS_INCREMENT,m_StartY+DEFAULT_LIST_CANVAS_HEIGHT);	
-			}		
+		if(messageobject.Selected == true)
+		{
+			graphics.setColor(Color.blue);
+			graphics.fillRect(5-XOffset+DEFAULT_LIST_CANVAS_HEIGHT,
+				m_StartY,TotalWidth,DEFAULT_LIST_CANVAS_INCREMENT);
+			graphics.setColor(Color.white);	
+			graphics.drawString(messageObject.Message,5-XOffset+
+				DEFAULT_LIST_CANVAS_INCREMENT,m_StartY+DEFAULT_LIST_CANVAS_HEIGHT);	
+		}
+		else
+		{
+			graphics.setColor(Color.white);
+			graphics.fillRect(5-XOffset+DEFAULT_LIST_CANVAS_HEIGHT,
+				m_StartY,TotalWidth,DEFAULT_LIST_CANVAS_INCREMENT);
+			graphics.setColor(Color.black);	
+			graphics.drawString(messageObject.Message,5-XOffset+
+				DEFAULT_LIST_CANVAS_INCREMENT,m_StartY+DEFAULT_LIST_CANVAS_HEIGHT);	
+		}		
 	}
 
 	// Obsługa eventów
+	@Override
 	public boolean handleEvent(Event event)
 	{
 		if(event.id == 1001 && event.arg == scrollview)
@@ -257,12 +251,12 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 			repaint();
 			return true;
 		} 
-		else {
+		else
 			return super.handleEvent(event);
-		}		
 	}
 
 	// Scroll
+	@Override
 	public boolean mouseDown(Event event, int i, int j)
 	{	
 		int CurrentY = j + YOffset;
@@ -283,7 +277,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 				if(CanvasType == ROOM_CANVAS)
 					chatclient.GetRoomUserCount(SelectedUser);	
 
-				if(CanvasType == USER_CANVAS)
+				if(CanvasType == USER_CANVAS || CanvasType == REGISTER_CANVAS)
 				{
 					if (IsIgnoredUser(SelectedUser))
 						chatclient.tappanel.CmdIgnoreUser.setLabel("Odblokuj");
@@ -291,22 +285,17 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 						chatclient.tappanel.CmdIgnoreUser.setLabel("Ignoruj");
 				}		
 			}
-			else {
-				messageobject.Selected=false;						
-			}		
+			else
+				messageobject.Selected=false;
 		}	
 		repaint();
 
 		if ((!SelectedFlag))
 			SelectedUser="";
 
-
-		if((event.clickCount == 2) && (CanvasType == USER_CANVAS) && 
+		if((event.clickCount == 2) && (CanvasType == USER_CANVAS || CanvasType == REGISTER_CANVAS) && 
 			(!(SelectedUser.equals(""))) && (!(SelectedUser.equals(chatclient.UserName))))
-		{
 			CreatePrivateWindow();	
-		}
-
 		return true;
 	}
 

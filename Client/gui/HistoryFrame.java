@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 public class HistoryFrame extends javax.swing.JFrame {
 		
 	public History hist;
-	private static final Logger LOG = Logger.getLogger( HistoryFrame.class.getName() );
+	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 	
 
 	
@@ -134,8 +134,7 @@ public class HistoryFrame extends javax.swing.JFrame {
 						break;
 					}
 				}
-			} catch (ClassNotFoundException | InstantiationException | 
-							IllegalAccessException | javax.swing.UnsupportedLookAndFeelException e) {
+			} catch (Exception e) {
 					LOG.log(Level.SEVERE, "HistoryFrame::main: ", e);
 			}
 			//</editor-fold>

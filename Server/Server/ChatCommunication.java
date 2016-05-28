@@ -44,7 +44,8 @@ public class ChatCommunication implements Runnable,CommonSettings
 				// Obsługa wskaźników
 				if(RFC.startsWith("REGI")){
 					LOG.log(Level.INFO, "REGI");
-					Parent.RegisterRequest(socket, RFC.substring(5));
+					Parent.RegisterRequest(socket, RFC.substring(5, RFC.indexOf(":")), 
+						RFC.substring(RFC.indexOf(":")+1));
 				}
 
 				if(RFC.startsWith("HELO")) {	

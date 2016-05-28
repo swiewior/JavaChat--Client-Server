@@ -1,8 +1,8 @@
 package gui;
 
-import client.TapPanel;
 import client.Client;
 import client.CommonSettings;
+import client.TapPanel;
 import java.awt.*;
 
 public class Border extends Canvas implements CommonSettings

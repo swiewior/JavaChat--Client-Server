@@ -1,14 +1,14 @@
 package server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import java.sql.*;
 
 public class Server extends JFrame implements Serializable, ActionListener, Runnable, CommonSettings
 {
@@ -21,6 +21,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	ArrayList<ClientObject> userarraylist;
 	ArrayList messagearraylist;
 	ArrayList<RoomObject> roomArrayList;
+	ArrayList<InboxObject> inboxArrayList;
 	public Vector clientFileSharingUsername;
 	public Vector clientFileSharingSocket;
 	ChatCommunication chatcommunication;	
@@ -28,6 +29,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	int G_ILoop, Port;
 	ClientObject clientobject;
 	RoomObject roomobject;
+	InboxObject inboxobject;
 	String RoomList;
 	protected TextField TxtPort, TxtRooms;
 	Properties properties;
@@ -151,6 +153,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			userarraylist = new ArrayList();
 			messagearraylist = new ArrayList();
 			roomArrayList = new ArrayList();
+			inboxArrayList = new ArrayList();
 			clientFileSharingUsername = new Vector();
 			clientFileSharingSocket = new Vector();
 			
@@ -171,15 +174,26 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			
 			//Tworzenie roomArrayList
 			String[] rooms = RoomList.split(";");
-			System.out.println("Tworzenie roomArrayList");
-			for (G_ILoop = 0; G_ILoop < rooms.length; G_ILoop++)
-			{
-				System.out.print(G_ILoop + ": " + rooms[G_ILoop] + "\n");
+			for (G_ILoop = 0; G_ILoop < rooms.length; G_ILoop++) {
 				roomobject = new RoomObject(rooms[G_ILoop]);
 				roomArrayList.add(roomobject);
 			}
-			System.out.print("\n");
-				
+			
+			//Tworzenie inboxArrayList			
+			try {
+				final String query = "SELECT username FROM registered";
+				try (Statement st = conn.createStatement()) {
+					ResultSet rs = st.executeQuery(query);
+					while (rs.next())
+					{
+						String registeredName = rs.getString("username");
+						inboxobject = new InboxObject(registeredName);
+						inboxArrayList.add(inboxobject);
+					}
+				}
+			} catch (SQLException e) {
+				LOG.log(Level.WARNING, "", e);
+			}
 
 			// Inicjalizacja wątku
 			thread = new Thread(this);
@@ -293,9 +307,9 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	{
 		int count = 0;
 		try {
-			final String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
+			final String queryCheck = "SELECT count(*) from registered WHERE username = ?";
 			final PreparedStatement ps = conn.prepareStatement(queryCheck);
-			ps.setString(1, hash);
+			ps.setString(1, UserName);
 			final ResultSet resultSet = ps.executeQuery();
 			if(resultSet.next()) {
 				count = resultSet.getInt(1);
@@ -311,6 +325,25 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			return;
 		}
 		
+		count = 0;
+		try {
+			final String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
+			final PreparedStatement ps = conn.prepareStatement(queryCheck);
+			ps.setString(1, hash);
+			final ResultSet resultSet = ps.executeQuery();
+			if(resultSet.next()) {
+				count = resultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, null, e);
+		}
+		
+		LOG.log(Level.INFO, "Hash: {0}", Integer.toString(count));
+		if (count == 0) {
+			SendMessageToClient(ClientSocket,"WRPA");
+			return;
+		}
+		
 		// Jeśli istnieje, koniec
 		if(IsUserExists(UserName)) {
 			SendMessageToClient(ClientSocket,"EXIS");
@@ -323,13 +356,13 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		// Info o użytkowniku do wszystkich					
 		int m_userListSize = userarraylist.size();
 		String m_addRFC = "ADD  "+UserName;
+		// Tworzenie listy użytkowników
 		StringBuffer stringbuffer = new StringBuffer("LIST ");
 		for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
 		{
 			clientobject = (ClientObject) userarraylist.get(G_ILoop);				
 			// Sprawdzenie nazwy pokoi
-			if(clientobject.getRoomName().equals(ROOM_NAME))
-			{
+			if(clientobject.getRoomName().equals(ROOM_NAME)) {
 				SendMessageToClient(clientobject.getSocket(),m_addRFC);
 				stringbuffer.append(clientobject.getUserName());													
 				stringbuffer.append(";");									
@@ -340,17 +373,35 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		clientobject = new ClientObject(ClientSocket, conn, UserName,ROOM_NAME);
 		userarraylist.add(clientobject);
 		
-		// Wysyłanie listy użytkowników
+		// Wysyłanie listy użytkowników z uwzględnieniem nowego usera
 		stringbuffer.append(UserName);
 		stringbuffer.append(";");
 		SendMessageToClient(ClientSocket,stringbuffer.toString());
 		
-		// Wysyłąnie listy ostatnich wiadomości
+		// Lista zarejestrowanych osób
+		try {
+			stringbuffer = new StringBuffer("REGL ");
+			final String query = "SELECT username FROM registered";
+			try (Statement st = conn.createStatement()) {
+				ResultSet rs = st.executeQuery(query);
+				
+				while (rs.next())
+				{
+					String registeredName = rs.getString("username");
+					stringbuffer.append(registeredName);
+					stringbuffer.append(";");
+				}
+			}
+			} catch (SQLException e) {
+			LOG.log(Level.WARNING, "", e);
+		}
+		SendMessageToClient(ClientSocket,stringbuffer.toString());
+		
+		// Wysyłanie listy ostatnich wiadomości
 		String[] messages;
 		int m_roomListSize = roomArrayList.size();
 		for(G_ILoop = 0; G_ILoop < m_roomListSize; G_ILoop++)
 		{
-			System.out.print(G_ILoop + " ");
 			roomobject = (RoomObject) roomArrayList.get(G_ILoop);
 			if(roomobject.getRoomName().equals(ROOM_NAME))
 			{
@@ -360,11 +411,26 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 					LOG.log(Level.INFO, "Ostatnia wiad: {0}", messages[G_ILoop]);
 					SendMessageToClient(ClientSocket, messages[G_ILoop]);
 				}
-				return;
+				break;
 			}			
 		}
-		System.out.print("\n");
-
+		
+		//Wysyłanie inbox
+		int m_inboxListSize = roomArrayList.size();
+		for(G_ILoop = 0; G_ILoop < m_inboxListSize; G_ILoop++)
+		{
+			inboxobject = (InboxObject) inboxArrayList.get(G_ILoop);
+			if(inboxobject.getUserName().equals(UserName))
+			{
+				while(!inboxobject.getMessageList().isEmpty())
+				{
+					String message = inboxobject.getMessageList().dequeue();
+					LOG.log(Level.INFO, "inbox: {0}", message);
+					SendMessageToClient(ClientSocket, message);
+				}
+				return;
+			}
+		}
 	}
 
 	// Usuń użytkownika z serwera
@@ -484,7 +550,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		int m_roomListSize = roomArrayList.size();
 		for(G_ILoop = 0; G_ILoop < m_roomListSize; G_ILoop++)
 		{
-			System.out.print(G_ILoop + " ");
 			roomobject = (RoomObject) roomArrayList.get(G_ILoop);
 			if(roomobject.getRoomName().equals(NewRoomName))
 			{
@@ -497,7 +562,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				return;
 			}			
 		}
-		System.out.print("\n");
 	}
 
 	// Wyślij Główną wiadomość
@@ -532,10 +596,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		{
 			clientobject = (ClientObject) userarraylist.get(G_ILoop);
 			if((clientobject.getRoomName().equals(RoomName)) && 
-				(!(clientobject.getUserName().equals(UserName))))
-			{				
-				SendMessageToClient(clientobject.getSocket(),m_messageRFC);	
-			}	
+					(!(clientobject.getUserName().equals(UserName))))
+				SendMessageToClient(clientobject.getSocket(),m_messageRFC);
 		}
 		
 		// Umieszczanie wiadomości w kolejce messageList
@@ -560,38 +622,49 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		}
 	}
 		
-		protected void SendFileRequest(String sender, String recipient, String filename)
-		{
-			clientobject = GetClientObject(recipient);
-			if(clientobject != null)
-				SendMessageToClient(clientobject.getSocket(), "UPRQ " + sender + "~" + 
-								recipient + ":" + filename);
+	protected void SendFileRequest(String sender, String recipient, String filename)
+	{
+		clientobject = GetClientObject(recipient);
+		if(clientobject != null)
+			SendMessageToClient(clientobject.getSocket(), "UPRQ " + sender + "~" + 
+							recipient + ":" + filename);
+		else
+			LOG.log(Level.WARNING, "clientobject == null");
+	}
 
-			else
-				LOG.log(Level.WARNING, "clientobject == null");
-		}
-		
-		protected void SendFileResponse(String sender, String recipient, String port)
-		{
-			clientobject = GetClientObject(recipient);
-			String IP = clientobject.getSocket().getInetAddress().getHostAddress();
-			
-			if(clientobject != null)
-				SendMessageToClient(clientobject.getSocket(), "UPRS " + IP + "~" + 
-								recipient + ":" + port);
-			else
-				LOG.log(Level.WARNING, "clientobject == null");
-		}
+	protected void SendFileResponse(String sender, String recipient, String port)
+	{
+		clientobject = GetClientObject(recipient);
+		String IP = clientobject.getSocket().getInetAddress().getHostAddress();
+
+		if(clientobject != null)
+			SendMessageToClient(clientobject.getSocket(), "UPRS " + IP + "~" + 
+							recipient + ":" + port);
+		else
+			LOG.log(Level.WARNING, "clientobject == null");
+	}
 
 	// Wysyłanie prywatnej wiadomości
 	protected void SendPrivateMessage(String Message , String ToUserName)
 	{		
 		clientobject = GetClientObject(ToUserName);
 		if(clientobject != null)
+			SendMessageToClient(clientobject.getSocket(),"PRIV "+Message);
+		else
 		{
-			SendMessageToClient(clientobject.getSocket(),"PRIV "+Message);	
+			// Umieszczanie wiadomości w kolejce messageList
+			int m_inboxListSize = inboxArrayList.size();
+			String m_messageRFC = "PRIV "+Message;
+			for(G_ILoop = 0; G_ILoop < m_inboxListSize; G_ILoop++)
+			{
+				inboxobject = (InboxObject) inboxArrayList.get(G_ILoop);
+				if(inboxobject.getUserName().equals(ToUserName)) {
+					LOG.log(Level.INFO, "Dodaję do inbox: {0}", m_messageRFC);
+					inboxobject.getMessageList().enqueue(m_messageRFC);
+					return;
+				}			
+			}
 		}
-
 	}
 
 	// Adres użytkownika
@@ -637,14 +710,14 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		SendMessageToClient(ClientSocket,"ROCO "+RoomName+"~"+m_userCount);
 	}
 		
-	protected void RegisterRequest(Socket ClientSocket, String hash)
+	protected void RegisterRequest(Socket ClientSocket, String userName, String hash)
 	{
 		LOG.log(Level.INFO, "hash to register: {0}", hash);
 		int count = 0;
 		try {
-			String queryCheck = "SELECT count(*) from registered WHERE hash = ?";
+			String queryCheck = "SELECT count(*) from registered WHERE username = ?";
 			PreparedStatement ps = conn.prepareStatement(queryCheck);
-			ps.setString(1, hash);
+			ps.setString(1, userName);
 			LOG.log(Level.INFO, ps.toString());
 			ResultSet resultSet = ps.executeQuery();
 			if(resultSet.next()) {
@@ -662,16 +735,47 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		}
 		
 		try {
-			String sql = "insert into registered (hash) "
-				+ "values (?)";
+			String sql = "insert into registered (hash, username) "
+				+ "values (?, ?)";
 			PreparedStatement st = conn.prepareStatement(sql);
 			st.setString (1, hash);
+			st.setString (2, userName);
 			st.execute();
 			SendMessageToClient(ClientSocket,"REGO " + "OK");
 		} catch (SQLException e) {
 			LOG.log(Level.WARNING, null, e);
 			SendMessageToClient(ClientSocket,"REGO " + "OTHER ERROR");
+			return;
 		}
+		
+		// Wysyłanie na nowo listy zarejestrowanych użytkowników do wszystkich
+		// Tworzenie listy zarejestrowanych
+		StringBuilder stringbuffer = new StringBuilder("REGL ");
+		try {
+			final String query = "SELECT username FROM registered";
+			try (Statement st = conn.createStatement()) {
+				ResultSet rs = st.executeQuery(query);
+				while (rs.next()) {
+					String registeredName = rs.getString("username");
+					stringbuffer.append(registeredName);
+					stringbuffer.append(";");
+				}
+			}
+		} catch (SQLException e) {
+			LOG.log(Level.WARNING, "", e);
+			return;
+		}
+		// Wysyłanie lsity do wszystkich
+		int m_userListSize = userarraylist.size();
+		for(G_ILoop = 0; G_ILoop < m_userListSize; G_ILoop++)
+		{
+			clientobject = (ClientObject) userarraylist.get(G_ILoop);
+			SendMessageToClient(clientobject.getSocket(), stringbuffer.toString());
+		}
+		
+		//Dodawanie świerzaka do inbox
+		inboxobject = new InboxObject(userName);
+		inboxArrayList.add(inboxobject);
 	}
 
 	// Zamykanie serwera, niszczenie wszystkiego
@@ -719,10 +823,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		} catch (SecurityException e) {
 			LOG.log(Level.SEVERE, null, e);
 		}
-		
 		cmdStop.setEnabled(false);
 		cmdStart.setEnabled(true);
-		
 	}
 
 	// Plik z ustawieniami
