@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -585,10 +586,12 @@ public class Client extends JFrame implements Serializable, Runnable,
 				if( ServerData.startsWith("UPRQ"))
 				{
 					String Sender = ServerData.substring(5,ServerData.indexOf("~"));
-					String Filename = ServerData.substring(ServerData.indexOf(":")+1);
-					if(0 == JOptionPane.showConfirmDialog(null, ("Odebrać '" + Filename + "' od "+SplitString+"?"), 
-									"Odbieranie pliku", JOptionPane.YES_NO_OPTION))
-					{
+					String Filename = ServerData.substring(ServerData.indexOf(":")+1, ServerData.indexOf("|"));
+					int Filesize = Integer.parseInt(ServerData.substring(ServerData.indexOf("|")+1));
+					double sizeToShow = (double)Filesize / 1024 / 1024;
+					if(0 == JOptionPane.showConfirmDialog(null, ("Odebrać '" + Filename +
+									"' ("+ new DecimalFormat("###.###").format(sizeToShow) + " MB) od "+Sender+"?"), 
+									"Odbieranie pliku", JOptionPane.YES_NO_OPTION)) {
 						JFileChooser jf = new JFileChooser();
 						jf.setSelectedFile(new File(Filename));
 						int returnVal = jf.showSaveDialog(null);
@@ -596,7 +599,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 						String saveTo = jf.getSelectedFile().getPath();
 						if(saveTo != null && returnVal == JFileChooser.APPROVE_OPTION)
 						{
-							Download dwn = new Download(saveTo, messagecanvas);
+							Download dwn = new Download(saveTo, messagecanvas, ServerPort, Filesize, this);
 							Thread t = new Thread(dwn);
 							t.start();
 							SendMessageToServer("UPRS "+ UserName + "~" + Sender + ":" + dwn.port);
@@ -627,8 +630,8 @@ public class Client extends JFrame implements Serializable, Runnable,
 						t.start();
 					}
 					else
-						messagecanvas.AddMessageToMessageObject("Odrzucono prośbę o odebranie pliku od" 
-										+ sender, MESSAGE_TYPE_ADMIN);
+						messagecanvas.AddMessageToMessageObject("Odrzucono prośbę o odebranie pliku",
+							MESSAGE_TYPE_LEAVE);
 				}		
 				
 				// Rejestracja
@@ -791,7 +794,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 	// Wysyłanie pliku - wiadomośc na serwer
 	public void SendFileMessage(String ToUserName, File filepath)
 	{
-		SendMessageToServer("UPRQ " + UserName + "~" + ToUserName + ":" + filepath.getName());
+		SendMessageToServer("UPRQ " + UserName + "~" + ToUserName + ":" + filepath.getName() + "|" + filepath.length());
 	}
 
 	// Zamykanie połączenia

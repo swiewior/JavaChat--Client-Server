@@ -253,7 +253,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			}	
 		}	
 	}
-
+// artifitial intelligence spam detection JavA
+	
 	// Wysyłanie wiadomości do klienta
 	private synchronized void SendMessageToClient(Socket clientsocket,String message)
 	{
@@ -418,8 +419,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		//Wysyłanie inbox
 		int m_inboxListSize = roomArrayList.size();
 		for(G_ILoop = 0; G_ILoop < m_inboxListSize; G_ILoop++)
-		{
-			inboxobject = (InboxObject) inboxArrayList.get(G_ILoop);
+		{	
+		inboxobject = (InboxObject) inboxArrayList.get(G_ILoop);
 			if(inboxobject.getUserName().equals(UserName))
 			{
 				while(!inboxobject.getMessageList().isEmpty())

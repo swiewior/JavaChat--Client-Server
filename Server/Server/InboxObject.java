@@ -6,7 +6,7 @@ public class InboxObject {
 	private String userName;
 	private ArrayQueue<String> messageList;
 	
-	InboxObject(String userName)
+	public InboxObject(String userName)
 	{
 		this.userName = userName;
 		messageList = new ArrayQueue(200);
