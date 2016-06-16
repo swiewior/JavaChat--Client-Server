@@ -52,7 +52,7 @@ public class TapPanel extends JPanel implements CommonSettings,ActionListener
 		ButtonsJPanel.add("North",CmdHistory);
 		CmdSendFile = new JButton("Wyślij plik");
 		CmdSendFile.addActionListener(this);
-		ButtonsJPanel.add("Center",CmdSendFile);	
+		ButtonsJPanel.add("Center",CmdSendFile);
 		
 		UserButtonJPanel.add("South", ButtonsJPanel);
 		UserPanel.add("South",UserButtonJPanel);

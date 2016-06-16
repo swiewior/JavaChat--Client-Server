@@ -79,24 +79,22 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 	}
 
 	// Ignorowanie użytkownika
-	protected void IgnoreUser(boolean IsIgnore, String IgnoreUserName)
-	{
+	protected void IgnoreUser(boolean IsIgnore, String IgnoreUserName) {
 		int m_listIndex = GetIndexOf(IgnoreUserName);
-		if (m_listIndex >= 0)
-		{
+		if (m_listIndex >= 0) {
 			messageobject = (MessageObject) ListArray.get(m_listIndex);
 			messageobject.IsIgnored = IsIgnore;
+			chatclient.SendMessageToServer("IGNO " + IgnoreUserName + "~" + IsIgnore);
 			ListArray.set(m_listIndex,messageobject);
 
 			if(IsIgnore) {
 				chatclient.tappanel.CmdIgnoreUser.setLabel("Odblokuj");
-				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został zablokowany",MESSAGE_TYPE_LEAVE);	
-			}
-			else {
+				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został zablokowany",MESSAGE_TYPE_LEAVE);
+			} else {
 				chatclient.tappanel.CmdIgnoreUser.setLabel("Ignoruj");
-				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został odblokowany",MESSAGE_TYPE_JOIN);	
+				chatclient.messagecanvas.AddMessageToMessageObject(IgnoreUserName + " został odblokowany",MESSAGE_TYPE_JOIN);
 			}
-		}	
+		}
 	}
 
 	// Wybór ignorowanego użytkownika

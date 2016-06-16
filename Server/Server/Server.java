@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import spam.*;
 
 public class Server extends JFrame implements Serializable, ActionListener, Runnable, CommonSettings
 {
@@ -38,12 +39,13 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	JMenuItem settingitem, quititem; 
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); 
 	Connection conn;
+	public SpamPanel spamPanel;
 	
 	public Server () 
 	{
 		//Inicjalizacja
 		this.setTitle("Java Chat Server");
-		this.setResizable(false);
+		this.setResizable(true);
 		this.setBackground(Color.white);		
 		this.setLayout(new BorderLayout());
 
@@ -60,15 +62,15 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		//Panel główny
 		JPanel centerPanel = new JPanel(null);
 		cmdStart = new JButton("START SERVER");
-		cmdStart.setBounds(125,10,150,30);
+		cmdStart.setBounds(175,10,150,30);
 		cmdStart.addActionListener(this);
-		centerPanel.add(cmdStart);
+		centerPanel.add("Center", cmdStart);
 
 		cmdStop = new JButton("STOP SERVER");
-		cmdStop.setBounds(125,50,150,30);
+		cmdStop.setBounds(175,50,150,30);
 		cmdStop.setEnabled(false);
 		cmdStop.addActionListener(this);
-		centerPanel.add(cmdStop);
+		centerPanel.add("Center", cmdStop);
 		
 		// Menu
 		JMenuBar menubar = new JMenuBar();
@@ -110,8 +112,11 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		this.setJMenuBar(menubar);
 		
 		add("Center", centerPanel);
+		
+		spamPanel = new SpamPanel(this);
+		add("South", spamPanel);
 
-		setSize(400,180);
+		setSize(500,420);
 		setLocation(100,100);
 		
 		// Zamknięcie okienka
@@ -256,7 +261,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 // artifitial intelligence spam detection JavA
 	
 	// Wysyłanie wiadomości do klienta
-	private synchronized void SendMessageToClient(Socket clientsocket,String message)
+	public synchronized void SendMessageToClient(Socket clientsocket,String message)
 	{
 		try {
 			dataoutputstream = new DataOutputStream(clientsocket.getOutputStream());			
@@ -268,7 +273,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	}
 
 	// Obiekt - nazwa użytkowanika
-	private ClientObject GetClientObject(String UserName)
+	public ClientObject GetClientObject(String UserName)
 	{
 		ClientObject returnClientObject = null;
 		ClientObject TempClientObject;
@@ -778,7 +783,19 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		inboxobject = new InboxObject(userName);
 		inboxArrayList.add(inboxobject);
 	}
+	
+	void Ignore(String IgnoredUserName, String IsIgnored) {
+		boolean boolIgnored = Boolean.parseBoolean(IsIgnored);
+		ClientObject IgnoredClient = GetClientObject(IgnoredUserName);
+		
+		//System.out.println("boolIgnored: " + boolIgnored);
+		//System.out.println("IgnoredClient: " + IgnoredClient.getUserName());
+		new spam.Ignore().Ignore(this, IgnoredClient, boolIgnored);
+	}
 
+	public void RemoveSelected() {
+		new spam.Ignore().RemoveSelected(this);
+	}
 	// Zamykanie serwera, niszczenie wszystkiego
 	void ExitServer()
 	{

@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -338,7 +339,7 @@ public class Client extends JFrame implements Serializable, Runnable,
     return null;
 	}
 
-	private void SendMessageToServer(String Message)
+	void SendMessageToServer(String Message)
 	{
 		try {
 			dataoutputstream.writeUTF(Message);	
@@ -453,8 +454,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 				}
 
 				// Dodanie do pokoju
-				if(ServerData.startsWith("ADD"))
-				{
+				if(ServerData.startsWith("ADD")) {
 					// Aktualizacja panelu informacyjnego
 					TotalUserCount++;
 					UpdateInformationLabel();
@@ -700,6 +700,11 @@ public class Client extends JFrame implements Serializable, Runnable,
 						}
 					}						
 				}
+			} catch(SocketException e) { 
+				LOG.log(Level.SEVERE, "", e);
+				messagecanvas.AddMessageToMessageObject("Utracono połączenie z serwerem", MESSAGE_TYPE_ADMIN);
+				QuitConnection(QUIT_TYPE_NULL);
+				break;
 			} catch(Exception e) { 
 				LOG.log(Level.SEVERE, "Client::run: ", e);
 				messagecanvas.AddMessageToMessageObject(e.getMessage(),MESSAGE_TYPE_ADMIN);
@@ -798,10 +803,8 @@ public class Client extends JFrame implements Serializable, Runnable,
 	}
 
 	// Zamykanie połączenia
-	private void QuitConnection(int QuitType)
-	{		
-		if(socket != null)
-		{
+	private void QuitConnection(int QuitType) {		
+		if(socket != null) {
 			try {
 				if (QuitType == QUIT_TYPE_DEFAULT)
 					SendMessageToServer("QUIT "+UserName+"~"+UserRoom);
@@ -810,12 +813,11 @@ public class Client extends JFrame implements Serializable, Runnable,
 				socket.close();	
 				socket = null;
 				tappanel.UserCanvas.ClearAll();					
-			}catch(IOException e) {
+			} catch(Exception e) {
 				LOG.log(Level.WARNING, "Client::QuitConnection: ", e);
 			}	
 		}
-		if(thread != null)
-		{
+		if(thread != null) {
 				thread.stop();
 				thread = null;
 		}		

@@ -1,9 +1,9 @@
 package server;
 
-import java.net.Socket;
-import java.io.IOException;
-import java.io.DataInputStream;
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,15 +87,20 @@ public class ChatCommunication implements Runnable,CommonSettings
 				}
 
 				if(RFC.startsWith("UPRQ")){
-					LOG.log(Level.INFO, "UPRQ");
+					LOG.log(Level.INFO, "Upload Request");
 					Parent.SendFileRequest(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
 				}
 
 				if(RFC.startsWith("UPRS")){
-					LOG.log(Level.INFO, "UPRS");
+					LOG.log(Level.INFO, "Upload Response");
 					Parent.SendFileResponse(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
+				}
+				if(RFC.startsWith("IGNO")){
+					LOG.log(Level.INFO, "Ignore/UnIgnore");
+					Parent.Ignore(RFC.substring(5, RFC.indexOf("~")), 
+									(RFC.substring(RFC.indexOf("~")+1)));
 				}
 				
 

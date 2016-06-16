@@ -16,6 +16,7 @@ public class ClientObject {
 	int userId;
 	static int id = 0;
 	Statement st;
+	int ignored;
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 
 	ClientObject(Socket socket, Connection con, String UserName,
@@ -23,7 +24,7 @@ public class ClientObject {
 		userId = ++id;
 		ClientSocket = socket;
 		conn = con;
-		
+		ignored = 0;
 		// do usunięcia
 		ClientUserName = UserName;
 		ClientRoomName = RoomName;
@@ -43,6 +44,10 @@ public class ClientObject {
 	public void setRoomName(String RoomName) {
 		ClientRoomName = RoomName;
 		update();
+	}	
+	
+	public void setUserIgnored(int ignored) {
+		this.ignored = ignored;
 	}
 
 	public Socket getSocket() {
@@ -59,6 +64,10 @@ public class ClientObject {
 	
 	public int getUserId() {
 		return userId;
+	}
+	
+	public int getUserIgnored() {
+		return ignored;
 	}
 	
 	private void push() {
