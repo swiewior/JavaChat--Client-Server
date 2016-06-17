@@ -54,20 +54,25 @@ public class Upload implements Runnable, CommonSettings{
 			while((count = pin.read(buffer)) >= 0){
 				Out.write(buffer, 0, count);
 				completed += count;
-				progress = (double)completed / (double)(int) file.length();
+				progress = (double)completed / (double) file.length();
 				pm.setNote("Ukończono " + new DecimalFormat("###.##%").format(progress));
 			}
-
 			messageCanvas.AddMessageToMessageObject("Ukończono wysyłanie pliku", MESSAGE_TYPE_ADMIN);
-
 			end();
+			
 		} catch (InterruptedIOException e) {
 			LOG.log(Level.INFO, "Cancelled", e);
 			messageCanvas.AddMessageToMessageObject("Przerwano pobieranie pliku",
 				MESSAGE_TYPE_LEAVE);
 			end();
+		} catch (SocketException e) {
+			LOG.log(Level.SEVERE, "SocketException", e);
+			messageCanvas.AddMessageToMessageObject("Błąd pobierania pliku",
+				MESSAGE_TYPE_LEAVE);
+			end();
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Upload::run: ", e);
+			end();
 		}
 	}
 	

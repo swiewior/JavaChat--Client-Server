@@ -22,7 +22,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class Client extends JFrame implements Serializable, Runnable, 
-				KeyListener, ActionListener, CommonSettings 
+				KeyListener, ActionListener, CommonSettings, ItemListener 
 {
 	// Zmienne globalne
 	String UserName,UserRoom,ServerName,AppletStatus,ChatLogo,BannerName,
@@ -32,13 +32,12 @@ public class Client extends JFrame implements Serializable, Runnable,
 	Socket socket;
 	DataInputStream datainputstream;
 	DataOutputStream dataoutputstream;
-	Color[] ColorMap;
 	Dimension dimension;
 	JLabel InformationLabel;
 	StringBuffer stringbuffer;
 	MessageCanvas messagecanvas;
 	ScrollView MessageScrollView;
-	Thread thread;
+	Thread thread, uploadThread;
 	StringTokenizer Tokenizer;
 	TapPanel tappanel;
 	TextField TxtMessage;
@@ -48,8 +47,9 @@ public class Client extends JFrame implements Serializable, Runnable,
 	protected int PrivateWindowCount;
 	InformationDialog dialog;
 	Toolkit toolkit;
-	JMenuItem loginitem, disconnectitem, seperatoritem, quititem, aboutitem, registeritem;
-	JRadioButtonMenuItem logOff, logSevere, logWarning, logInfo;
+	MenuItem loginitem, disconnectitem, seperatoritem, quititem, aboutitem, registeritem;
+	CheckboxMenuItem logOff, logSevere, logWarning, logInfo;
+	Upload upload;
 	
 	public History hist;
 	public HistoryFrame historyFrame;
@@ -75,53 +75,53 @@ public class Client extends JFrame implements Serializable, Runnable,
 		public void windowClosing(WindowEvent evt) { DisconnectChat();System.exit(0);}});
 
 		// Menu
-		JMenuBar menubar = new JMenuBar();
-		JMenu loginmenu = new JMenu("Połączenie");		
-		loginitem = new JMenuItem("Zaloguj");
+		MenuBar menubar = new MenuBar();
+		Menu loginmenu = new Menu("Połączenie");		
+		loginitem = new MenuItem("Zaloguj");
 		loginitem.addActionListener(this);
-		disconnectitem = new JMenuItem("Rozłącz");
+		disconnectitem = new MenuItem("Rozłącz");
 		disconnectitem.addActionListener(this);
-		quititem = new JMenuItem("Wyjście");
+		quititem = new MenuItem("Wyjście");
 		quititem.addActionListener(this);
 		loginmenu.add(loginitem);
 		loginmenu.add(disconnectitem);
 		loginmenu.addSeparator();
 		loginmenu.add(quititem);
 
-		JMenu aboutmenu = new JMenu("Pomoc ");
-		aboutitem = new JMenuItem("O programie ");
+		Menu aboutmenu = new Menu("Pomoc ");
+		aboutitem = new MenuItem("O programie ");
 		aboutitem.addActionListener(this);
 		aboutmenu.add(aboutitem);
 		
 		//Ustawienia menu Logi
-		JMenu logmenu = new JMenu("Logi");
+		Menu logmenu = new Menu("Logi");
 		ButtonGroup group = new ButtonGroup();
 		
-		logOff = new JRadioButtonMenuItem("Wyłączone");
+		logOff = new CheckboxMenuItem("Wyłączone",  false);
 		logmenu.add(logOff);
-		logOff.addActionListener(this);
-		group.add(logOff);
+		logOff.addItemListener(this);
+		//group.add(logOff);
 		
-		logSevere = new JRadioButtonMenuItem("Krytyczne");
+		logSevere = new CheckboxMenuItem("Krytyczne", true);
 		logmenu.add(logSevere);
-		logSevere.addActionListener(this);
-		logSevere.setSelected(true);
-		group.add(logSevere);
+		logSevere.addItemListener(this);
+		//logSevere.setSelected(true);
+		//group.add(logSevere);
 		
-		logWarning = new JRadioButtonMenuItem("Ostrzeżenia");
+		logWarning = new CheckboxMenuItem("Ostrzeżenia", false);
 		logmenu.add(logWarning);
-		group.add(logWarning);
-		logWarning.addActionListener(this);
+		//group.add(logWarning);
+		logWarning.addItemListener(this);
 		
-		logInfo = new JRadioButtonMenuItem("Informacyjne");
+		logInfo = new CheckboxMenuItem("Informacyjne", false);
 		logmenu.add(logInfo);
-		group.add(logInfo);
-		logInfo.addActionListener(this);
+		//group.add(logInfo);
+		logInfo.addItemListener(this);
 		
 		menubar.add(loginmenu);
 		menubar.add(aboutmenu);
 		menubar.add(logmenu);
-		this.setJMenuBar(menubar);
+		this.setMenuBar(menubar);
 		
 		// Parametry	
 		UserName = "";			
@@ -141,15 +141,13 @@ public class Client extends JFrame implements Serializable, Runnable,
 		private void InitializeAppletComponents()
 	{
 		// Ustawienia okienka
-		this.setBackground(Color.white);	
 		Font font = new Font("Dialog",Font.BOLD,11);
-		TextFont = new Font("Dialog",0,11);	
+		TextFont = new Font("Dialog",0,13);	
 		setFont(font);	
 
 		// Panel informacji
 		JPanel CenterPanel = new JPanel(new BorderLayout());
 		JPanel InformationPanel = new JPanel(new BorderLayout());	
-		InformationPanel.setBackground(Color.white);			
 		InformationLabel = new JLabel();
 		InformationLabel.setHorizontalAlignment(JLabel.CENTER);
 
@@ -212,16 +210,13 @@ public class Client extends JFrame implements Serializable, Runnable,
 			if (!(TxtMessage.getText().trim().equals("")))
 				SendMessage();	
 		}	
-
 		if ((evt.getSource().equals(CmdExit)) || (evt.getSource().equals(quititem))) {
 			DisconnectChat();
 			System.exit(0);
 		}
-
 		if(evt.getSource().equals(loginitem)) {
 			LoginToChat();
 		}
-
 		if(evt.getSource().equals(disconnectitem)) {			
 			DisconnectChat();						
 		}		
@@ -232,15 +227,31 @@ public class Client extends JFrame implements Serializable, Runnable,
 			messagebox.AddMessage("Informatyka Stosowana, 2015/2016");
 
 		}
-		if(evt.getSource().equals(logOff))	
-			LOG.setLevel(Level.OFF);	
-		if(evt.getSource().equals(logSevere))	
-			LOG.setLevel(Level.SEVERE);
-		if(evt.getSource().equals(logWarning))	
-			LOG.setLevel(Level.WARNING);
-		if(evt.getSource().equals(logInfo))
-			LOG.setLevel(Level.ALL);
 
+	}
+	@Override
+	public void itemStateChanged(ItemEvent evt) {
+		logOff.setState(false);
+		logSevere.setState(false);
+		logWarning.setState(false);
+		logInfo.setState(false);
+		
+		if(evt.getItem().equals(logOff.getLabel()))	 {
+			logOff.setState(true);
+			LOG.setLevel(Level.OFF);	
+		}
+		if(evt.getItem().equals(logSevere.getLabel()))	{
+			logSevere.setState(true);
+			LOG.setLevel(Level.SEVERE);
+		}
+		if(evt.getItem().equals(logWarning.getLabel())) {
+			logWarning.setState(true);
+			LOG.setLevel(Level.WARNING);
+		}		
+		if(evt.getItem().equals(logInfo.getLabel())) {
+			logInfo.setState(true);
+			LOG.setLevel(Level.ALL);
+		}
 	}
 
 	// Enter wysyła
@@ -339,7 +350,7 @@ public class Client extends JFrame implements Serializable, Runnable,
     return null;
 	}
 
-	void SendMessageToServer(String Message)
+	public void SendMessageToServer(String Message)
 	{
 		try {
 			dataoutputstream.writeUTF(Message);	
@@ -493,14 +504,13 @@ public class Client extends JFrame implements Serializable, Runnable,
 
 					tappanel.UserCanvas.RemoveListItem(SplitString);
 					RemoveUserFromPrivateChat(SplitString);
-					messagecanvas.AddMessageToMessageObject(SplitString+" został wylogowany z czatu.",MESSAGE_TYPE_LEAVE );
+					messagecanvas.AddMessageToMessageObject(SplitString+" wylogował się.",MESSAGE_TYPE_LEAVE );
 
 					// Aktualizacja panelu informacyjnego
 					TotalUserCount--;
 					UpdateInformationLabel();
 
 				}
-
 				// Odbieranie wiadomości
 				if( ServerData.startsWith("MESS"))
 				{
@@ -525,8 +535,8 @@ public class Client extends JFrame implements Serializable, Runnable,
 				// Wyrzucanie
 				if (ServerData.startsWith("KICK"))
 				{
-					messagecanvas.AddMessageToMessageObject("Zostałeś wyrzucony za zbyt dużo wiadomości",MESSAGE_TYPE_ADMIN);
-					LOG.log(Level.INFO, "Zostałeś wyrzucony za zbyt dużo wiadomości");
+					messagecanvas.AddMessageToMessageObject("Zostałeś wyrzucony za spamowanie",MESSAGE_TYPE_ADMIN);
+					LOG.log(Level.INFO, "Zostałeś wyrzucony za spamowanie");
 					thread = null;
 					QuitConnection(QUIT_TYPE_KICK);	
 				}
@@ -587,8 +597,8 @@ public class Client extends JFrame implements Serializable, Runnable,
 				{
 					String Sender = ServerData.substring(5,ServerData.indexOf("~"));
 					String Filename = ServerData.substring(ServerData.indexOf(":")+1, ServerData.indexOf("|"));
-					int Filesize = Integer.parseInt(ServerData.substring(ServerData.indexOf("|")+1));
-					double sizeToShow = (double)Filesize / 1024 / 1024;
+					double Filesize = Double.parseDouble(ServerData.substring(ServerData.indexOf("|")+1));
+					double sizeToShow = Filesize / 1024 / 1024;
 					if(0 == JOptionPane.showConfirmDialog(null, ("Odebrać '" + Filename +
 									"' ("+ new DecimalFormat("###.###").format(sizeToShow) + " MB) od "+Sender+"?"), 
 									"Odbieranie pliku", JOptionPane.YES_NO_OPTION)) {
@@ -599,7 +609,8 @@ public class Client extends JFrame implements Serializable, Runnable,
 						String saveTo = jf.getSelectedFile().getPath();
 						if(saveTo != null && returnVal == JFileChooser.APPROVE_OPTION)
 						{
-							Download dwn = new Download(saveTo, messagecanvas, ServerPort, Filesize, this);
+							Download dwn = new Download(saveTo, messagecanvas, ServerPort, Filesize, this,
+								Sender);
 							Thread t = new Thread(dwn);
 							t.start();
 							SendMessageToServer("UPRS "+ UserName + "~" + Sender + ":" + dwn.port);
@@ -625,14 +636,20 @@ public class Client extends JFrame implements Serializable, Runnable,
 						int port	= Integer.parseInt(answer);
 						String addr = sender;
 
-						Upload upl = new Upload(addr, port, tappanel.UserCanvas.file, messagecanvas);
-						Thread t = new Thread(upl);
-						t.start();
+						upload = new Upload(addr, port, tappanel.UserCanvas.file, messagecanvas);
+						uploadThread = new Thread(upload);
+						uploadThread.start();
 					}
 					else
 						messagecanvas.AddMessageToMessageObject("Odrzucono prośbę o odebranie pliku",
 							MESSAGE_TYPE_LEAVE);
 				}		
+				
+				//Anulowanie pobierania
+				if(ServerData.startsWith("UPCL")) {
+					upload.end();
+					uploadThread.stop();
+				}
 				
 				// Rejestracja
 				if(ServerData.startsWith("REGO"))
@@ -704,11 +721,12 @@ public class Client extends JFrame implements Serializable, Runnable,
 				LOG.log(Level.SEVERE, "", e);
 				messagecanvas.AddMessageToMessageObject("Utracono połączenie z serwerem", MESSAGE_TYPE_ADMIN);
 				QuitConnection(QUIT_TYPE_NULL);
-				break;
+				return;
 			} catch(Exception e) { 
 				LOG.log(Level.SEVERE, "Client::run: ", e);
 				messagecanvas.AddMessageToMessageObject(e.getMessage(),MESSAGE_TYPE_ADMIN);
 				QuitConnection(QUIT_TYPE_DEFAULT); 
+				return;
 			}	
 		}	
 	}
@@ -863,7 +881,7 @@ public class Client extends JFrame implements Serializable, Runnable,
 	{
 		if(socket != null) 
 		{
-			messagecanvas.AddMessageToMessageObject("Połączenie z serwerem zakończone",MESSAGE_TYPE_ADMIN);				
+			messagecanvas.AddMessageToMessageObject("Wylogowano",MESSAGE_TYPE_ADMIN);				
 			QuitConnection(QUIT_TYPE_DEFAULT);			
 		}	
 	}

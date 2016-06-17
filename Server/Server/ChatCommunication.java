@@ -97,11 +97,16 @@ public class ChatCommunication implements Runnable,CommonSettings
 					Parent.SendFileResponse(RFC.substring(5, RFC.indexOf("~")), 
 									RFC.substring(RFC.indexOf("~")+1, RFC.indexOf(":")), RFC.substring(RFC.indexOf(":")+1));
 				}
+				if(RFC.startsWith("UPCL")){
+					LOG.log(Level.INFO, "Upload Cancel");
+					Parent.SendFileCancel(RFC.substring(5));
+				}
 				if(RFC.startsWith("IGNO")){
 					LOG.log(Level.INFO, "Ignore/UnIgnore");
 					Parent.Ignore(RFC.substring(5, RFC.indexOf("~")), 
 									(RFC.substring(RFC.indexOf("~")+1)));
 				}
+				
 				
 
 			} catch(Exception e) { 

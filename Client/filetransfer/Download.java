@@ -14,8 +14,9 @@ public class Download implements Runnable, CommonSettings {
 	
 	public ServerSocket server;
 	public Socket socket;
-	public int port, fileSize, serverPort;
-	public String saveTo = "";
+	public int port, serverPort;
+	public double fileSize;
+	public String saveTo = "", Sender;
 	public InputStream fileInput;
 	public FileOutputStream fileOutput;
 	public MessageCanvas messageCanvas;
@@ -24,7 +25,8 @@ public class Download implements Runnable, CommonSettings {
 	ProgressMonitor pm;
 	private static final Logger LOG = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
 	
-	public Download(String saveTo, MessageCanvas mc, int sp, int fs, client.Client parent){
+	public Download(String saveTo, MessageCanvas mc, int sp, double fs, client.Client parent,
+		String Sender){
 		
 		try {
 			server = new ServerSocket(0);
@@ -34,6 +36,7 @@ public class Download implements Runnable, CommonSettings {
 			this.parent = parent;
 			this.fileSize = fs;
 			this.serverPort = sp;
+			this.Sender = Sender;
 		}
 		catch (IOException e) {
 			LOG.log(Level.WARNING, "Download::Download: ", e);
@@ -50,7 +53,7 @@ public class Download implements Runnable, CommonSettings {
 			pin = new ProgressMonitorInputStream(null, 
 				"Pobieranie " + saveTo, fileInput);
 			pm = pin.getProgressMonitor();
-			pm.setMaximum(fileSize);
+			pm.setMaximum((int)fileSize);
 			
 			fileOutput = new FileOutputStream(saveTo);
 			
@@ -73,6 +76,7 @@ public class Download implements Runnable, CommonSettings {
 		} 
 		catch (InterruptedIOException e) {
 			LOG.log(Level.INFO, "Cancelled", e);
+			parent.SendMessageToServer("UPCL "+Sender);
 			messageCanvas.AddMessageToMessageObject("Przerwano pobieranie pliku",
 				MESSAGE_TYPE_LEAVE);
 			end();
@@ -81,7 +85,7 @@ public class Download implements Runnable, CommonSettings {
 			LOG.log(Level.WARNING, "IOException", e);
 		}
 		catch (InterruptedException e) {
-			LOG.log(Level.WARNING, "Other Exception", e);
+			LOG.log(Level.SEVERE, "Other Exception", e);
 		}
 	}
 	

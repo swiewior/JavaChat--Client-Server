@@ -153,12 +153,7 @@ public class ListViewCanvas extends Canvas implements CommonSettings
 		file = fileChooser.getSelectedFile();
 
 		// Wysyłanie pliku
-		long size = file.length();
-		if(size < 120 * 1024 * 1024)
-			chatclient.SendFileMessage(SelectedUser, file);
-		else
-			chatclient.messagecanvas.AddMessageToMessageObject("Rozmiar pliku jest za duży",
-					MESSAGE_TYPE_ADMIN);	
+		chatclient.SendFileMessage(SelectedUser, file);
 	}
 
 	// Sprawdzanie czy użytkownik jest ignorowany

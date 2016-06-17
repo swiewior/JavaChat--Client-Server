@@ -1,7 +1,7 @@
 package client;
 
-import java.awt.event.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -52,7 +52,7 @@ public class InformationDialog extends JDialog implements ActionListener
 		
 		//Zakładka Połączenia
 		JPanel ConnectPanel = new JPanel(new GridLayout(4,2,15,15));				
-		ConnectPanel.setBackground(Color.white);
+		//ConnectPanel.setBackground(Color.white);
 
 		JLabel LblServerName = new JLabel("Adres serwera: ");
 		TxtServerName = new JTextField();
@@ -82,7 +82,7 @@ public class InformationDialog extends JDialog implements ActionListener
 		
 		//Zakładka Rejestracji
 		JPanel RegisterPanel = new JPanel(new GridLayout(4,2,15,15));				
-		RegisterPanel.setBackground(Color.white);
+		//RegisterPanel.setBackground(Color.white);
 		
 		JLabel lblRegisterNick = new JLabel("Nick: ");
 		txtRegisterNick = new JTextField();
@@ -104,7 +104,7 @@ public class InformationDialog extends JDialog implements ActionListener
 		
 		//Zakładka Logowania
 		JPanel LoginPanel = new JPanel(new GridLayout(4,2,15,15));				
-		LoginPanel.setBackground(Color.white);
+		//LoginPanel.setBackground(Color.white);
 
 		JLabel LblUserName = new JLabel("Nick: ");
 		TxtUserName = new JTextField(properties.getProperty("user"));
@@ -141,19 +141,19 @@ public class InformationDialog extends JDialog implements ActionListener
 		add("Center",tabPanel);
 
 		JPanel EmptyNorthPanel = new JPanel();
-		EmptyNorthPanel.setBackground(Color.white);
+		//EmptyNorthPanel.setBackground(Color.white);
 		add("North",EmptyNorthPanel);
 
 		JPanel EmptySouthPanel = new JPanel();
-		EmptySouthPanel.setBackground(Color.white);
+		//EmptySouthPanel.setBackground(Color.white);
 		add("South",EmptySouthPanel);
 
 		JPanel EmptyEastPanel = new JPanel();
-		EmptyEastPanel.setBackground(Color.white);
+		//EmptyEastPanel.setBackground(Color.white);
 		add("East",EmptyEastPanel);
 
 		JPanel EmptyWestPanel = new JPanel();
-		EmptyWestPanel.setBackground(Color.white);
+//		EmptyWestPanel.setBackground(Color.white);
 		add("West",EmptyWestPanel);
 
 		try {

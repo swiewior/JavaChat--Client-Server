@@ -136,7 +136,10 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 	{
 		dialog = new InformationDialog(this);	
 		Port = Integer.parseInt(dialog.TxtPort.getText());
-		RoomList = dialog.TxtRooms.getText();
+		StringBuilder rooms = new StringBuilder();
+		rooms.append("Główny;");
+		rooms.append(dialog.TxtRooms.getText());
+		RoomList = rooms.toString();
 	}
   
 	// Obsługa eventów
@@ -258,7 +261,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			}	
 		}	
 	}
-// artifitial intelligence spam detection JavA
 	
 	// Wysyłanie wiadomości do klienta
 	public synchronized void SendMessageToClient(Socket clientsocket,String message)
@@ -391,8 +393,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			try (Statement st = conn.createStatement()) {
 				ResultSet rs = st.executeQuery(query);
 				
-				while (rs.next())
-				{
+				while (rs.next()) {
 					String registeredName = rs.getString("username");
 					stringbuffer.append(registeredName);
 					stringbuffer.append(";");
@@ -423,20 +424,19 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		
 		//Wysyłanie inbox
 		int m_inboxListSize = roomArrayList.size();
-		for(G_ILoop = 0; G_ILoop < m_inboxListSize; G_ILoop++)
-		{	
+		for(G_ILoop = 0; G_ILoop < m_inboxListSize; G_ILoop++) {	
 		inboxobject = (InboxObject) inboxArrayList.get(G_ILoop);
-			if(inboxobject.getUserName().equals(UserName))
-			{
-				while(!inboxobject.getMessageList().isEmpty())
-				{
+			if(inboxobject.getUserName().equals(UserName)) {
+				while(!inboxobject.getMessageList().isEmpty()) {
 					String message = inboxobject.getMessageList().dequeue();
 					LOG.log(Level.INFO, "inbox: {0}", message);
 					SendMessageToClient(ClientSocket, message);
 				}
-				return;
+				break;
 			}
 		}
+		
+		new Ignore().UpdateIgnore(this, clientobject);
 	}
 
 	// Usuń użytkownika z serwera
@@ -445,6 +445,9 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		ClientObject removeclientobject = GetClientObject(UserName);
 		if(removeclientobject != null)
 		{
+			// Usuń użytkownika z listy ignorowanych
+			new spam.Ignore().RemoveDisconnected(this, removeclientobject);
+			
 			userarraylist.remove(removeclientobject);	
 			userarraylist.trimToSize();
 			int m_userListSize = userarraylist.size();
@@ -461,13 +464,13 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 					SendMessageToClient(clientobject.getSocket(),m_RemoveRFC);
 			}		
 			
-		// Usuń użytkownika z bazy danych
-		try {
-			removeclientobject.delete();
-		} catch (SQLException e) {
-			LOG.log(Level.WARNING, null, e);
+			// Usuń użytkownika z bazy danych
+			try {
+				removeclientobject.delete();
+			} catch (SQLException e) {
+				LOG.log(Level.WARNING, null, e);
+			}
 		}
-		}			
 	}
 
 	// Wywal użytkownika gdy wyskoczy exception
@@ -480,13 +483,16 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			removeclientobject = (ClientObject) userarraylist.get(G_ILoop);
 			if(removeclientobject.getSocket().equals(clientsocket))
 			{
+				// Usuń użytkownika z listy ignorowanych
+				new spam.Ignore().RemoveDisconnected(this, removeclientobject);
+				
 				String m_RemoveUserName = removeclientobject.getUserName();
 				String m_RemoveRoomName = removeclientobject.getRoomName();
 				userarraylist.remove(removeclientobject);	
 				userarraylist.trimToSize();					
 				m_userListSize = userarraylist.size();
 				
-				String m_RemoveRFC="REMO "+m_RemoveUserName;
+				String m_RemoveRFC="INKI "+m_RemoveUserName;
 				// Wyślij informacje o usunięciu do wszystkich
 				for(int m_ILoop = 0; m_ILoop < m_userListSize; m_ILoop++)
 				{
@@ -501,7 +507,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 				} catch (SQLException e) {
 					LOG.log(Level.WARNING, null, e);
 				}
-		
 				return;	
 			}	
 		}
@@ -649,6 +654,11 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		else
 			LOG.log(Level.WARNING, "clientobject == null");
 	}
+	protected void SendFileCancel(String recipient) {
+		clientobject = GetClientObject(recipient);
+		SendMessageToClient(clientobject.getSocket(), "UPCL");
+	}
+	
 
 	// Wysyłanie prywatnej wiadomości
 	protected void SendPrivateMessage(String Message , String ToUserName)
@@ -670,30 +680,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 					return;
 				}			
 			}
-		}
-	}
-
-	// Adres użytkownika
-	protected void GetRemoteUserAddress(Socket ClientSocket, String ToUserName, 
-		String FromUserName)
-	{
-			clientobject = GetClientObject(ToUserName);
-			if(clientobject != null)
-			{			
-				SendMessageToClient(clientobject.getSocket(),"REIP "+ FromUserName +"~"+
-					ClientSocket.getInetAddress().getHostAddress());			
-			}
-	}
-
-	// Wysyłanie adresu użytkownika
-	protected void SendRemoteUserAddress(Socket ClientSocket, String ToUserName, 
-		String FromUserName)
-	{
-		clientobject = GetClientObject(FromUserName);		
-		if(clientobject != null)
-		{			
-			SendMessageToClient(clientobject.getSocket(),"AEIP "+ ToUserName +"~"+
-				ClientSocket.getInetAddress().getHostAddress());						
 		}
 	}
 
@@ -788,8 +774,6 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 		boolean boolIgnored = Boolean.parseBoolean(IsIgnored);
 		ClientObject IgnoredClient = GetClientObject(IgnoredUserName);
 		
-		//System.out.println("boolIgnored: " + boolIgnored);
-		//System.out.println("IgnoredClient: " + IgnoredClient.getUserName());
 		new spam.Ignore().Ignore(this, IgnoredClient, boolIgnored);
 	}
 

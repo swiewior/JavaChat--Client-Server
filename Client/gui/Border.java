@@ -25,7 +25,7 @@ public class Border extends Canvas implements CommonSettings
 	{
 		int i = size().width;
 		int j = size().height;
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.fillRect(0, 0, i, j);
 		g.setColor(Color.white);
 		g.drawLine(1, 0, 1, j - 2);
@@ -137,12 +137,12 @@ public class Border extends Canvas implements CommonSettings
 	{
 		int i = size().width;
 		int j = size().height;
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.fillRect(0, 0, size().width, size().height);
 		g.setColor(Color.white);
 		g.drawLine(1, 1, 1, j + 1);
 		g.drawLine(1, 1, i - 3, 1);
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.drawLine(0, 0, i, 0);
 		g.drawLine(0, 1, 0, j + 1);
 		g.fillRect(2, 2, bsize, j);
@@ -166,7 +166,7 @@ public class Border extends Canvas implements CommonSettings
 	public void DrawVertical(Graphics g)
 	{
 		int i = size().height;
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.drawLine(0, 0, 0, i);
 		g.fillRect(2, 0, bsize, i);
 		g.setColor(Color.white);
@@ -224,7 +224,7 @@ public class Border extends Canvas implements CommonSettings
 		fontmetrics.getHeight();
 		int i1 = parent.xofs + 1;
 		byte byte0 = 7;
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.fillRect(0, l, i, k);
 		g.drawLine(0, l, 0, k + 1);
 		g.fillRect(2, l + 1, bsize, k);
@@ -232,10 +232,10 @@ public class Border extends Canvas implements CommonSettings
 		g.setColor(Color.white);
 		g.drawLine(1, l, 1, k + 1);
 		g.drawLine(1, l, i - 3, l);
-		g.setColor(Color.gray);
+		g.setColor(Color.white);
 		g.drawLine(bsize + 2, l + bsize + 2, i - (bsize + 2), l + bsize + 2);
 		g.drawLine(i - 2, l, i - 2, k + 1);
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.drawLine(bsize + 3, l + bsize + 3, i - (bsize + 3), l + bsize + 3);
 		g.drawLine(i - 1, l, i - 1, k + 1);
 		parent.tabPos.removeAllElements();
@@ -260,9 +260,9 @@ public class Border extends Canvas implements CommonSettings
 
 	public void DrawHorizontal(Graphics g)
 	{
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		g.fillRect(0, 0, width, height);
-		g.setColor(Color.white);
+		g.setColor(Color.lightGray);
 		int i = width - 8;
 		g.drawLine(0, 1, i, 1);
 		g.fillRect(i, 0, 1, 1);

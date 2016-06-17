@@ -15,21 +15,15 @@ public class Ignore {
 		else
 			IgnoreUserObject.setUserIgnored(IgnoreUserObject.getUserIgnored() - 1);
 		
-		Update(IgnoreUserObject);
+		UpdateIgnore(Parent, IgnoreUserObject);
 	}
 	
-	public void Update (ClientObject IgnoreUserObject) {
+	public void UpdateIgnore (Server parent, ClientObject IgnoreUserObject) {
+		frame = parent.spamPanel;
 		DefaultTableModel table = (DefaultTableModel) frame.ignoredTable.getModel();
 		int ignores = IgnoreUserObject.getUserIgnored();
 		String name = IgnoreUserObject.getUserName();
-		String ip = IgnoreUserObject.getSocket().getLocalSocketAddress().toString();
-		
-		if (ignores == 0) {
-			for (int i = 0; i < table.getRowCount(); i++)
-				if (table.getValueAt(i, 0).equals(name))
-					table.removeRow(i);
-			return;
-		}
+		String ip = IgnoreUserObject.getSocket().getInetAddress().getHostAddress().toString();
 		
 		for (int i = 0; i < table.getRowCount(); i++) {
 			
@@ -40,8 +34,7 @@ public class Ignore {
 			}
 		}
 		
-		table.addRow(new Object[]{name, ip, ignores});
-		
+		table.addRow(new Object[]{name, ip, ignores});	
 	}
 	
 	public void RemoveSelected(Server parent) {
@@ -53,8 +46,20 @@ public class Ignore {
 		ClientObject client = parent.GetClientObject(userName);
 		parent.SendMessageToClient(client.getSocket(),"KICK ");
 		parent.RemoveUser(userName, client.getRoomName(), KICK_USER);
-		table.removeRow(selectedRow);
 	}
 	
-	
+	public void RemoveDisconnected(Server parent, ClientObject removeclientobject) {
+		frame = parent.spamPanel;
+		DefaultTableModel table = (DefaultTableModel) frame.ignoredTable.getModel();
+		String userName = removeclientobject.getUserName().toString();
+		
+		for (int i = 0; i < table.getRowCount(); i++) {
+			
+			if (table.getValueAt(i, 0).equals(userName)) {
+				table.removeRow(i);
+				return;
+			}
+		}
+		
+	}
 }

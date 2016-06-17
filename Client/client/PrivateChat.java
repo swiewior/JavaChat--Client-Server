@@ -24,7 +24,7 @@ public class PrivateChat extends Frame implements CommonSettings,KeyListener,Act
 		client = Parent;
 		UserName = ToUserName;
 		setTitle("Prywatna rozmowa z "+UserName); 	
-		setBackground(Color.white);
+		//setBackground(Color.white);
 		setFont(client.getFont());
 		InitializeComponents();
 		
