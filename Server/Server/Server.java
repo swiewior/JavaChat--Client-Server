@@ -258,7 +258,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			catch(InterruptedException | IOException e) 	{ 
 				LOG.log(Level.SEVERE, "Server::run: ", e);
 				ExitServer(); 
-			}	
+			}
 		}	
 	}
 	
@@ -319,9 +319,8 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			final PreparedStatement ps = conn.prepareStatement(queryCheck);
 			ps.setString(1, UserName);
 			final ResultSet resultSet = ps.executeQuery();
-			if(resultSet.next()) {
+			if(resultSet.next())
 				count = resultSet.getInt(1);
-			}
 			
 		} catch (SQLException e) {
 			LOG.log(Level.WARNING, null, e);
@@ -808,6 +807,7 @@ public class Server extends JFrame implements Serializable, ActionListener, Runn
 			Statement st = conn.createStatement();
 			String sql = "Truncate table logged";
 			st.executeUpdate(sql);
+			st.close();
 		} catch (SQLException | NullPointerException e) {
 			LOG.log(Level.SEVERE, "Czyszczenie tablicy logged", e);
 		}

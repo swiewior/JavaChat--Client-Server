@@ -66,7 +66,7 @@ public class Download implements Runnable, CommonSettings {
 				completed += count;
 				progress = (double)completed / (double)fileSize;
 				pm.setNote("Ukończono " + new DecimalFormat("###.##%").format(progress));
-				Thread.sleep(50);
+				Thread.sleep(50); // do testowania przesyłania plików
 			}
 			
 			messageCanvas.AddMessageToMessageObject("Ukończono pobieranie pliku", 
@@ -85,8 +85,8 @@ public class Download implements Runnable, CommonSettings {
 			LOG.log(Level.WARNING, "IOException", e);
 		}
 		catch (InterruptedException e) {
-			LOG.log(Level.SEVERE, "Other Exception", e);
-		}
+			LOG.log(Level.SEVERE, "Thread.sleep exception", e);
+		} // do testowania przesyłania plików
 	}
 	
 	public void end() {

@@ -46,6 +46,7 @@ public class ChatCommunication implements Runnable,CommonSettings
 					LOG.log(Level.INFO, "REGI");
 					Parent.RegisterRequest(socket, RFC.substring(5, RFC.indexOf(":")), 
 						RFC.substring(RFC.indexOf(":")+1));
+					continue;
 				}
 
 				if(RFC.startsWith("HELO")) {	

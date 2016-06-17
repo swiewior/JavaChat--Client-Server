@@ -57,7 +57,9 @@ public class History
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(new File(filePath));
+			//try {
 			transformer.transform(source, result);
+			
 		} 
 			catch(Exception e)
 			{
