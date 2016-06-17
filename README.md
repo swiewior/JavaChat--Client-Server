@@ -1,7 +1,9 @@
 # Harmonogram projektu #
 Wyrażam zgodę na opublikowanie mojego kodu w celach edukacyjnych.
+
 Celem projektu było stworzenie wielowątkowego chatu. Po uruchomieniu serwera chatu użytkownik podaje port nasłuchujący oraz listę pokoi oddzielonych średnikiem. Pola są wypełnione wartościami odczytanymi z pliku ustawień, a gdy ten nie istnieje, wartościami domyślnymi. Po wypełnieniu ustawień pojawia się okienko serwera, na którym znajdują się przyciski start, stop oraz tabela zalogowanych użytkowników z możliwością rozłączenia dowolnego z nich.
-Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce użytkownik podaje adres i port serwera z którym się łączy. W kolejnej może się zarejestrować w bazie danych. W ostaniej zakładce użytkownik loguje się z użyciem podanego wcześniej hasła. Po pozytywnym przejściu trzech kroków nastąpi nawiązanie połączenia. Użytkownik zostanie przypisany do pokoju "Główny" i zostaniu mu przesłana lista ostatnich 200 wiadomości. 
+Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce użytkownik podaje adres i port serwera z którym się łączy. W kolejnej może się zarejestrować w bazie danych. W ostaniej zakładce użytkownik loguje się z użyciem podanego wcześniej hasła. Po pozytywnym przejściu trzech kroków nastąpi nawiązanie połączenia. Użytkownik zostanie przypisany do pokoju "Główny" i zostaniu mu przesłana lista ostatnich 200 wiadomości. Po każdej zmianie pokoju wczytywane są ostatnie wiadomości. Jeżeli podczas nieobecności użytkownika ktoś próbował wysłać do niego prywatną wiadomość, to otrzyma ją po zalogowaniu się. Istnieje możliwość przesyłania plików pomiędzy użytkownikami znajdującymi się w tym samym pokoju. Po wyrażeniu zgody na odebranie pliku zestawiane jest bezpośrednie połączenie między użytkownikami i wyświetla się pasek postępu. Każdy z użytkowników może anulować przesyłanie pliku.
+
 ## Wielowątkowy serwer chatu ##
 ### 1. Okienka ###
 * *Okno chatu (15.03.2016)*
@@ -33,3 +35,9 @@ Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce 
 * *Wysyłanie prywatnych wiadomości (5.04.2016)*
 * *Możliwość przesyłania plików przez sieć (10.05.2016)*
 * *Historia rozmów (19.04.2016)*
+
+![1.PNG](https://bitbucket.org/repo/azbKAq/images/2464019827-1.PNG)
+![2.PNG](https://bitbucket.org/repo/azbKAq/images/2249311729-2.PNG)
+![3.PNG](https://bitbucket.org/repo/azbKAq/images/1159670398-3.PNG)
+![4.PNG](https://bitbucket.org/repo/azbKAq/images/1239582197-4.PNG)
+![5.PNG](https://bitbucket.org/repo/azbKAq/images/2910233180-5.PNG)
