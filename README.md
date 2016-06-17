@@ -11,7 +11,6 @@
 * *Zapis logów serwera (17.05.2016)*
 ### 3. Współbieżność ###
 * *Wielowątkowość prosta (1 klient – 1 wątek), wątek nasłuchujący (8.03.2016)*
-* Ograniczenie masowej wielowątkowości przy wielu użytkownikach (nIO)
 * *Mechanizm wrzucania wiadomości do skrzynek użytkowników (31.05.2016)*
 * *Mechanizm przechowywania rozmowy (31.05.2016)*
 ### 4. Bazy danych ###
@@ -24,6 +23,7 @@
 * *Obsługa plików (11.06.2016)*
 * *Odczytanie wiadomości, wysłanie odpowiedzi (po stronie serwera i klienta), zorganizowanie protokołu komunikacji (1.03.2016)*
 * *Wyrzucanie użytkowników wysyłających zbyt dużo wiadomości (11.06.2016)*
+* *Administracja zalogowanymi użytkownikami (SPAM) (16.06.2016)*
 ### 6. Zaproponowane przez studenta ###
 * *Pokoje rozmów (5.04.2016)*
 * *GUI + logika na serwerze (12.04.2016)*
