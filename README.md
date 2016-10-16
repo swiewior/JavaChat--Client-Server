@@ -7,7 +7,7 @@ Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce 
 Struktura bazy danych (MySQL 5.7)
 
 * logged
-** id_logged (int PK)
+* * id_logged (int PK)
 ** username (text)
 ** roomanme (text)
 * registered
