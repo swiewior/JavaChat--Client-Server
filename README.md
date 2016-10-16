@@ -6,15 +6,15 @@ Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce 
 
 Struktura bazy danych (MySQL 5.7)
 
-- logged
-- id_logged (int PK)
-- username (text)
-- roomanme (text)
-- registered
-- id_register (int AI PK)
-- hash (char 32)
-- username (text)
-- timestamp (datetime)
+* logged
+** id_logged (int PK)
+** username (text)
+** roomanme (text)
+* registered
+** id_register (int AI PK)
+** hash (char 32)
+** username (text)
+** timestamp (datetime)
 
 Bez bazy danych serwer się nie uruchomi.
 Projekt powstał w celu nauczenia podstaw programowania w Java. Wiele rzeczy wymaga dopracowania, przede wszystkim GUI, obsługa wątków, połączenie z bazą danych. Pytania: sbswwr+javaprojekt@gmail.com
