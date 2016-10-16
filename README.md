@@ -5,6 +5,7 @@ Celem projektu było stworzenie wielowątkowego chatu. Po uruchomieniu serwera c
 Po uruchomieniu serwera pojawia się okno z ustawieniami. W pierwszej zakładce użytkownik podaje adres i port serwera z którym się łączy. W kolejnej może się zarejestrować w bazie danych. W ostaniej zakładce użytkownik loguje się z użyciem podanego wcześniej hasła. Po pozytywnym przejściu trzech kroków nastąpi nawiązanie połączenia. Użytkownik zostanie przypisany do pokoju "Główny" i zostaniu mu przesłana lista ostatnich 200 wiadomości. Po każdej zmianie pokoju wczytywane są ostatnie wiadomości. Jeżeli podczas nieobecności użytkownika ktoś próbował wysłać do niego prywatną wiadomość, to otrzyma ją po zalogowaniu się. Istnieje możliwość przesyłania plików pomiędzy użytkownikami znajdującymi się w tym samym pokoju. Po wyrażeniu zgody na odebranie pliku zestawiane jest bezpośrednie połączenie między użytkownikami i wyświetla się pasek postępu. Każdy z użytkowników może anulować przesyłanie pliku.
 
 Struktura bazy danych (MySQL 5.7)
+
 	- logged
 		- id_logged (int PK)
 		- username (text)
@@ -16,7 +17,9 @@ Struktura bazy danych (MySQL 5.7)
 		- timestamp (datetime)
 
 Bez bazy danych serwer się nie uruchomi.
-Projekt powstał w celu nauczenia podstaw programowania w Java. Wiele rzeczy wymaga dopracowania, przede wszystkim GUI, obsługa wątków, połączenie z bazą danych. Jeżeli masz dodatkowe pytania, wyślij e-mail na adres: sbswwr+javaprojekt@gmail.com
+Projekt powstał w celu nauczenia podstaw programowania w Java. Wiele rzeczy wymaga dopracowania, przede wszystkim GUI, obsługa wątków, połączenie z bazą danych. Pytania: sbswwr+javaprojekt@gmail.com
+
+W projekcie wykorzystałem udostępniony kod z wielu różnych źródeł w Internecie. Większości autorów nie pamiętam. Głównym wzorcem był ten projekt: http://www.codeproject.com/Articles/2440/Java-Chat-With-Customizable-GUI autorstwa 
 
 ## Wielowątkowy serwer chatu ##
 ### 1. Okienka ###
