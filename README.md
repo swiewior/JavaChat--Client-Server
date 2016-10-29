@@ -18,9 +18,9 @@ Struktura bazy danych (MySQL 5.7)
 * - timestamp (datetime)
 
 Bez bazy danych serwer się nie uruchomi.
-Projekt powstał w celu nauczenia podstaw programowania w Java. Wiele rzeczy wymaga dopracowania, przede wszystkim GUI, obsługa wątków, połączenie z bazą danych. Pytania: sbswwr+javaprojekt@gmail.com
+Projekt powstał w celu nauczenia podstaw programowania w Java. Wiele rzeczy wymaga dopracowania, przede wszystkim GUI, obsługa wątków, połączenie z bazą danych.
 
-W projekcie wykorzystałem udostępniony kod z wielu różnych źródeł w Internecie. Większości autorów nie pamiętam. Głównym wzorcem był ten projekt: http://www.codeproject.com/Articles/2440/Java-Chat-With-Customizable-GUI autorstwa 
+W projekcie wykorzystałem udostępniony kod z wielu różnych źródeł w Internecie. Większości autorów nie pamiętam. Głównym wzorcem był ten projekt: http://www.codeproject.com/Articles/2440/Java-Chat-With-Customizable-GUI 
 
 ## Wielowątkowy serwer chatu ##
 ### 1. Okienka ###
